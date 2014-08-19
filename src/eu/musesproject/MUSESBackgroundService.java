@@ -20,15 +20,14 @@ package eu.musesproject;
  * #L%
  */
 
-import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
-import eu.musesproject.client.contextmonitoring.service.aidl.MusesServiceProvider;
-import eu.musesproject.client.prediction.session.SessionController;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
+import eu.musesproject.client.prediction.session.SessionController;
 
 /**
  * This class is responsible to start the background service which enables the
@@ -77,7 +76,7 @@ public class MUSESBackgroundService extends Service {
 					Intent.ACTION_USER_PRESENT));
 			registerReceiver(mSessionController, new IntentFilter(SessionController.ACTION_QUIT_SESSION));
 		}
-		startService(new Intent(this, MusesServiceProvider.class));
+//		startService(new Intent(this, MusesServiceProvider.class));
 
 		return Service.START_STICKY;
 	}

@@ -24,14 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
-import android.util.Log;
-import eu.musesproject.client.contextmonitoring.service.aidl.DummyCommunication;
 import eu.musesproject.client.model.actuators.ResponseInfoAP;
 import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.contextmonitoring.UISource;
 import eu.musesproject.client.model.decisiontable.Action;
 import eu.musesproject.client.model.decisiontable.ActionType;
-import eu.musesproject.client.usercontexteventhandler.UserContextEventHandler;
 import eu.musesproject.server.risktrust.RiskTreatment;
 
 /**
@@ -49,7 +46,7 @@ import eu.musesproject.server.risktrust.RiskTreatment;
 public class UserContextMonitoringController implements
         IUserContextMonitoringController {
     private static UserContextMonitoringController ucmController = null;
-    private final UserContextEventHandler uceHandler = UserContextEventHandler.getInstance();
+//    private final UserContextEventHandler uceHandler = UserContextEventHandler.getInstance();
 
     private Context context;
     
@@ -57,8 +54,8 @@ public class UserContextMonitoringController implements
 
     private UserContextMonitoringController(Context context) {
         this.context = context;
-        uceHandler.setContext(context);
-        uceHandler.connectToServer();
+//        uceHandler.setContext(context);
+//        uceHandler.connectToServer();
         
         requestByMusesAwareApp = false;
     }
@@ -102,16 +99,16 @@ public class UserContextMonitoringController implements
                 riskTreatment = new RiskTreatment("action denied because of...");
             }
             if(requestByMusesAwareApp) {
-            	new DummyCommunication(context).sendResponse(infoAP, riskTreatment);
+//            	new DummyCommunication(context).sendResponse(infoAP, riskTreatment);
             }
         }
         else if(src == UISource.MUSES_AWARE_APP_UI) {
         	requestByMusesAwareApp = true;
-            uceHandler.send(action, properties, SensorController.getInstance(context).getLastFiredEvents());
+//            uceHandler.send(action, properties, SensorController.getInstance(context).getLastFiredEvents());
         }
         else if(src == UISource.INTERNAL) {
         	requestByMusesAwareApp = false;
-        	uceHandler.send(action, properties, SensorController.getInstance(context).getLastFiredEvents());
+//        	uceHandler.send(action, properties, SensorController.getInstance(context).getLastFiredEvents());
         }
     }
 
@@ -124,6 +121,6 @@ public class UserContextMonitoringController implements
 
     @Override
     public void login(String userName, String password) {
-        uceHandler.login(userName, password);
+//        uceHandler.login(userName, password);
     }
 }

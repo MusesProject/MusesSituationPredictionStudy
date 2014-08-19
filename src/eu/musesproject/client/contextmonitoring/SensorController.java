@@ -192,27 +192,6 @@ public class SensorController {
              * 4. send the action via the {@link eu.musesproject.client.contextmonitoring.UserContextMonitoringController}
              *      to the server
              */
-
-            Action userAction = null;
-            Map<String, String> properties = null;
-            // 1. if lastFiredContextEvents.size() is 0 than it is the initial context event and no further processing
-            // have to be done
-            if(lastFiredContextEvents.size() > 0) {
-                // 2. create an user action
-                userAction = UserActionGenerator.createUserAction(contextEvent, lastFiredContextEvents);
-                properties = UserActionGenerator.createUserActionProperties(contextEvent);
-            }
-
-            // 3. update Map with the new context event
-            if(lastFiredContextEvents.containsKey(contextEvent.getType())) {
-                lastFiredContextEvents.remove(contextEvent.getType());
-            }
-            lastFiredContextEvents.put(contextEvent.getType(), contextEvent);
-
-            // 4. send action to the UserContextMonitoringController
-            if(userAction != null && properties!= null) {
-                UserContextMonitoringController.getInstance(context).sendUserAction(UISource.INTERNAL, userAction, properties);
-            }
             
             // add contextevent to all context event table
             mAllEvents.add(contextEvent);

@@ -29,8 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,19 +39,17 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import eu.musesproject.MUSESBackgroundService;
 import eu.musesproject.client.R;
-import eu.musesproject.client.actuators.ActuatorController;
-import eu.musesproject.client.connectionmanager.NetworkChecker;
 import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
 import eu.musesproject.client.model.contextmonitoring.UISource;
 import eu.musesproject.client.model.decisiontable.Action;
 import eu.musesproject.client.model.decisiontable.ActionType;
 import eu.musesproject.client.prediction.dataexport.DataExport;
 import eu.musesproject.client.prediction.preferences.IsLabelingActivatedPreference;
-import eu.musesproject.client.prediction.session.SessionDataController;
 
 /**
  * MainActivity class handles List buttons on the main GUI
@@ -62,7 +58,8 @@ import eu.musesproject.client.prediction.session.SessionDataController;
  * @version Jan 27, 2014
  */
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener,
+		OnCheckedChangeListener {
 
 	public static final String DECISION_OK = "ok";
 	public static final String DECISION_CANCEL = "cancel";
@@ -71,10 +68,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private static final String PASSWORD = "password";
 	private static final String PREFERENCES_KEY = "eu.musesproject.client";
 	private static String TAG = MainActivity.class.getSimpleName();
-	private LinearLayout topLayout;
-	private Button loginListBtn, securityInformationListbtn;
+	private Button mExportButton;
+	private Switch mLabelingSwitch;
 	private Context context;
-	private LoginView loginView;
+	// private LoginView loginView;
 	private UserContextMonitoringController userContextMonitoringController;
 	public static boolean isLoggedIn = false;
 	private SharedPreferences prefs;
@@ -88,16 +85,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		setContentView(R.layout.muses_main);
 		context = getApplicationContext();
 
-		topLayout = (LinearLayout) findViewById(R.id.top_layout);
-		loginListBtn = (Button) findViewById(R.id.login_list_button);
-		securityInformationListbtn = (Button) findViewById(R.id.security_info_list_button);
-		loginListBtn.setOnClickListener(this);
-		securityInformationListbtn.setOnClickListener(this);
+		// loginListBtn.setOnClickListener(this);
+		// securityInformationListbtn.setOnClickListener(this);
+
+		mExportButton = (Button) findViewById(R.id.export_button);
+		mExportButton.setOnClickListener(this);
+
+		mLabelingSwitch = (Switch) findViewById(R.id.labeling_switch);
 
 		userContextMonitoringController = UserContextMonitoringController
 				.getInstance(context);
 
-		registerCallbacks();
+		// registerCallbacks();
 		prefs = context.getSharedPreferences(MainActivity.PREFERENCES_KEY,
 				Context.MODE_PRIVATE);
 
@@ -108,9 +107,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			Log.v(TAG, "muses service started ...");
 		}
 
-		loginView = new LoginView(context);
-		topLayout.removeAllViews();
-		topLayout.addView(loginView);
+		// loginView = new LoginView(context);
+		// topLayout.removeAllViews();
+		// topLayout.addView(loginView);
 		// setAppIconOnStatusBar();
 	}
 
@@ -177,120 +176,81 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 		} else
 			return false;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		menu.findItem(R.id.action_labeling).setChecked(
-				IsLabelingActivatedPreference.getInstance().get(
-						getApplicationContext()));
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_labeling:
-			if (item.isChecked()) {
-				item.setChecked(false);
-			} else {
-				item.setChecked(true);
-			}
-			IsLabelingActivatedPreference.getInstance().set(
-					getApplicationContext(), item.isChecked());
-
-			return true;
- 
-		case R.id.action_export:
-			new DataExport(getApplicationContext()).exportData();
-			return true;
-			
-		default:
-			break;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+	}	
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.login_list_button:
-			topLayout.removeAllViews();
-			topLayout.addView(loginView);
-			break;
-		case R.id.security_info_list_button:
-			if (isLoggedIn) {
-				// topLayout.removeAllViews();
-			}
+		case R.id.export_button:
+			new DataExport(getApplicationContext()).exportData();
 			break;
 		}
 	}
 
 	@Override
 	public void onResume() {
-
-		if (loginView != null)
-			loginView = new LoginView(context);
-		topLayout.removeAllViews();
-		topLayout.addView(loginView);
-
 		super.onResume();
+		mLabelingSwitch.setOnCheckedChangeListener(null);
+		if (IsLabelingActivatedPreference.getInstance().get(
+				getApplicationContext())) {
+			mLabelingSwitch.setChecked(true);
+		}
+		mLabelingSwitch.setOnCheckedChangeListener(this);
 	}
 
-	private Handler callbackHandler = new Handler() {
-
-		private String decisionName;
-		private String riskTextualDecp;
-
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case MusesUICallbacksHandler.LOGIN_SUCCESSFUL:
-				loginView.updateLoginView();
-				isLoggedIn = true;
-				toastMessage(getResources().getString(
-						R.string.login_success_msg));
-				break;
-			case MusesUICallbacksHandler.LOGIN_UNSUCCESSFUL:
-				toastMessage(getResources().getString(R.string.login_fail_msg));
-				break;
-			case MusesUICallbacksHandler.ACTION_RESPONSE_ACCEPTED:
-				Log.d(TAG, "Action response accepted ..");
-				// FIXME This action should not be sent here, if action is
-				// granted then it should be sent directly from MusDM
-				Action action = new Action();
-				action.setActionType(ActionType.OK);
-				action.setTimestamp(System.currentTimeMillis());
-				Log.e(TAG, "user pressed ok..");
-				sendUserDecisionToMusDM(action);
-				break;
-			case MusesUICallbacksHandler.ACTION_RESPONSE_DENIED:
-				Log.d(TAG, "Action response denied ..");
-				decisionName = msg.getData().getString("name");
-				riskTextualDecp = msg.getData().getString("risk_textual_decp");
-				showResultDialog(riskTextualDecp,
-						MusesUICallbacksHandler.ACTION_RESPONSE_DENIED);
-				break;
-			case MusesUICallbacksHandler.ACTION_RESPONSE_MAY_BE:
-				Log.d(TAG, "Action response maybe ..");
-				decisionName = msg.getData().getString("name");
-				riskTextualDecp = msg.getData().getString("risk_textual_decp");
-				showResultDialog(riskTextualDecp,
-						MusesUICallbacksHandler.ACTION_RESPONSE_MAY_BE);
-				break;
-			case MusesUICallbacksHandler.ACTION_RESPONSE_UP_TO_USER:
-				Log.d(TAG, "Action response upToUser ..");
-				decisionName = msg.getData().getString("name");
-				riskTextualDecp = msg.getData().getString("risk_textual_decp");
-				showResultDialog(riskTextualDecp,
-						MusesUICallbacksHandler.ACTION_RESPONSE_UP_TO_USER);
-				break;
-
-			}
-		}
-
-	};
+	// private Handler callbackHandler = new Handler() {
+	//
+	// private String decisionName;
+	// private String riskTextualDecp;
+	//
+	// @Override
+	// public void handleMessage(Message msg) {
+	// switch (msg.what) {
+	// case MusesUICallbacksHandler.LOGIN_SUCCESSFUL:
+	// loginView.updateLoginView();
+	// isLoggedIn = true;
+	// toastMessage(getResources().getString(
+	// R.string.login_success_msg));
+	// break;
+	// case MusesUICallbacksHandler.LOGIN_UNSUCCESSFUL:
+	// toastMessage(getResources().getString(R.string.login_fail_msg));
+	// break;
+	// case MusesUICallbacksHandler.ACTION_RESPONSE_ACCEPTED:
+	// Log.d(TAG, "Action response accepted ..");
+	// // FIXME This action should not be sent here, if action is
+	// // granted then it should be sent directly from MusDM
+	// Action action = new Action();
+	// action.setActionType(ActionType.OK);
+	// action.setTimestamp(System.currentTimeMillis());
+	// Log.e(TAG, "user pressed ok..");
+	// sendUserDecisionToMusDM(action);
+	// break;
+	// case MusesUICallbacksHandler.ACTION_RESPONSE_DENIED:
+	// Log.d(TAG, "Action response denied ..");
+	// decisionName = msg.getData().getString("name");
+	// riskTextualDecp = msg.getData().getString("risk_textual_decp");
+	// showResultDialog(riskTextualDecp,
+	// MusesUICallbacksHandler.ACTION_RESPONSE_DENIED);
+	// break;
+	// case MusesUICallbacksHandler.ACTION_RESPONSE_MAY_BE:
+	// Log.d(TAG, "Action response maybe ..");
+	// decisionName = msg.getData().getString("name");
+	// riskTextualDecp = msg.getData().getString("risk_textual_decp");
+	// showResultDialog(riskTextualDecp,
+	// MusesUICallbacksHandler.ACTION_RESPONSE_MAY_BE);
+	// break;
+	// case MusesUICallbacksHandler.ACTION_RESPONSE_UP_TO_USER:
+	// Log.d(TAG, "Action response upToUser ..");
+	// decisionName = msg.getData().getString("name");
+	// riskTextualDecp = msg.getData().getString("risk_textual_decp");
+	// showResultDialog(riskTextualDecp,
+	// MusesUICallbacksHandler.ACTION_RESPONSE_UP_TO_USER);
+	// break;
+	//
+	// }
+	// }
+	//
+	// };
 
 	/**
 	 * Shows the result dialog to the user
@@ -299,18 +259,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	 */
 
 	private void showResultDialog(String message, int type) {
-		Intent showFeedbackIntent = new Intent(getApplicationContext(),
-				FeedbackActivity.class);
-		showFeedbackIntent.putExtra("message", message);
-		showFeedbackIntent.putExtra("type", type);
-		showFeedbackIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
-				| Intent.FLAG_ACTIVITY_CLEAR_TOP
-				| Intent.FLAG_ACTIVITY_NEW_TASK);
-
-		Bundle extras = new Bundle();
-		extras.putString(MainActivity.DECISION_KEY, MainActivity.DECISION_OK);
-		showFeedbackIntent.putExtras(extras);
-		startActivity(showFeedbackIntent);
+		// Intent showFeedbackIntent = new Intent(getApplicationContext(),
+		// FeedbackActivity.class);
+		// showFeedbackIntent.putExtra("message", message);
+		// showFeedbackIntent.putExtra("type", type);
+		// showFeedbackIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+		// | Intent.FLAG_ACTIVITY_CLEAR_TOP
+		// | Intent.FLAG_ACTIVITY_NEW_TASK);
+		//
+		// Bundle extras = new Bundle();
+		// extras.putString(MainActivity.DECISION_KEY,
+		// MainActivity.DECISION_OK);
+		// showFeedbackIntent.putExtras(extras);
+		// startActivity(showFeedbackIntent);
 	}
 
 	/**
@@ -325,16 +286,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
 				action, null);
 	}
 
-	/**
-	 * Registers for callbacks using MusesUICallbacksHandler in
-	 * UserContextMonitoringImplementation.
-	 */
-	private void registerCallbacks() {
-		MusesUICallbacksHandler musesUICallbacksHandler = new MusesUICallbacksHandler(
-				context, callbackHandler);
-		ActuatorController.getInstance().registerCallback(
-				musesUICallbacksHandler);
-	}
+	// /**
+	// * Registers for callbacks using MusesUICallbacksHandler in
+	// * UserContextMonitoringImplementation.
+	// */
+	// private void registerCallbacks() {
+	// MusesUICallbacksHandler musesUICallbacksHandler = new
+	// MusesUICallbacksHandler(
+	// context, callbackHandler);
+	// ActuatorController.getInstance().registerCallback(
+	// musesUICallbacksHandler);
+	// }
 
 	/**
 	 * Toast messages to UI
@@ -346,216 +308,190 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 	}
 
-	/**
-	 * Check the login fields and Then tries login to the server
-	 */
+	// /**
+	// * Check the login fields and Then tries login to the server
+	// */
+	//
+	// public void doLogin(String userName, String password) {
+	// if (checkLoginInputFields(userName, password)) {
+	// userContextMonitoringController.login(userName, password);
+	// loginView.setUsernamePasswordIfSaved();
+	// } else {
+	// toastMessage(getResources().getString(
+	// R.string.empty_login_fields_msg));
+	// }
+	// }
 
-	public void doLogin(String userName, String password) {
-		if (checkLoginInputFields(userName, password)) {
-			userContextMonitoringController.login(userName, password);
-			loginView.setUsernamePasswordIfSaved();
-		} else {
-			toastMessage(getResources().getString(
-					R.string.empty_login_fields_msg));
-		}
-	}
+	// /**
+	// * Check input fields are not empty before sending it for authentication
+	// *
+	// * @param userName
+	// * @param password
+	// * @return
+	// */
+	//
+	// private boolean checkLoginInputFields(String userName, String password) {
+	// if (userName != null || password != null) {
+	// if (userName.equals("") || password.equals(""))
+	// return false; // FIXME need some new checking in future
+	// } else
+	// return false;
+	// return true;
+	// }
 
-	/**
-	 * Check input fields are not empty before sending it for authentication
-	 * 
-	 * @param userName
-	 * @param password
-	 * @return
-	 */
+	// /**
+	// * LoginView class handles Login GUI (Username, passwords etc ) on the
+	// main
+	// * GUI
+	// *
+	// * @author Yasir Ali
+	// * @version Jan 27, 2014
+	// */
 
-	private boolean checkLoginInputFields(String userName, String password) {
-		if (userName != null || password != null) {
-			if (userName.equals("") || password.equals(""))
-				return false; // FIXME need some new checking in future
-		} else
-			return false;
-		return true;
-	}
+	// private class LoginView extends LinearLayout implements
+	// View.OnClickListener, OnCheckedChangeListener {
+	//
+	// private EditText userNameTxt, passwordTxt;
+	// private LinearLayout loginLayout1, loginLayout2;
+	// private Button loginBtn, logoutBtn;
+	// private TextView loginDetailTextView;
+	// private CheckBox rememberCheckBox, agreeTermsCheckBox;
+	// private String userName, password;
+	// boolean isPrivacyPolicyAgreementChecked = false;
+	//
+	// public LoginView(Context context) {
+	// super(context);
+	// // inflate(context, R.layout.login_view, this);
+	// // userNameTxt = (EditText) findViewById(R.id.username_text);
+	// // passwordTxt = (EditText) findViewById(R.id.pass_text);
+	// //
+	// // userNameTxt.setText("muses");
+	// // passwordTxt.setText("muses");
+	// // userName = userNameTxt.getText().toString();
+	// // password = passwordTxt.getText().toString();
+	// //
+	// // loginDetailTextView = (TextView)
+	// // findViewById(R.id.login_detail_text_view);
+	// // rememberCheckBox = (CheckBox)
+	// // findViewById(R.id.remember_checkbox);
+	// // rememberCheckBox.setOnCheckedChangeListener(this);
+	// // agreeTermsCheckBox = (CheckBox)
+	// // findViewById(R.id.agree_terms_checkbox);
+	// // agreeTermsCheckBox.setOnCheckedChangeListener(this);
+	// // // loginLayout1 = (LinearLayout)
+	// // findViewById(R.id.login_layout_1);
+	// // loginLayout2 = (LinearLayout) findViewById(R.id.login_layout_2);
+	// // loginBtn = (Button) findViewById(R.id.login_button);
+	// // loginBtn.setOnClickListener(this);
+	// // logoutBtn = (Button) findViewById(R.id.logout_button);
+	// // logoutBtn.setOnClickListener(this);
+	// // setUsernamePasswordIfSaved();
+	// // populateLoggedInView();
+	// }
+	//
+	// /**
+	// * Populate logged in view if user is successfully logged in.
+	// *
+	// */
+	//
+	// private void populateLoggedInView() {
+	// if (isLoggedIn) {
+	// loginLayout2.setVisibility(View.GONE);
+	// logoutBtn.setVisibility(View.VISIBLE);
+	// }
+	// }
+	//
+	// @Override
+	// public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
+	// // switch (arg0.getId()) {
+	// // case R.id.remember_checkbox:
+	// // userName = userNameTxt.getText().toString();
+	// // password = passwordTxt.getText().toString();
+	// // SharedPreferences.Editor prefEditor = prefs.edit();
+	// // if (isChecked) {
+	// // if (checkLoginInputFields(userName, password)) {
+	// // prefEditor.putString(USERNAME, userName);
+	// // prefEditor.putString(PASSWORD, password);
+	// // prefEditor.commit();
+	// // }
+	// // } else {
+	// // prefEditor.clear();
+	// // prefEditor.commit();
+	// // }
+	// // break;
+	// // case R.id.agree_terms_checkbox:
+	// // if (isChecked) {
+	// // isPrivacyPolicyAgreementChecked = true;
+	// // } else
+	// // isPrivacyPolicyAgreementChecked = false;
+	// // break;
+	// // }
+	// }
+	//
+	// /**
+	// * Handles all the button on the screen, overridden method for
+	// * onClickLitsener
+	// *
+	// * @param View
+	// *
+	// */
+	//
+	// @Override
+	// public void onClick(View v) {
+	// // switch (v.getId()) {
+	// // case R.id.login_button:
+	// // if (isPrivacyPolicyAgreementChecked) {
+	// // userName = userNameTxt.getText().toString();
+	// // password = passwordTxt.getText().toString();
+	// // if (NetworkChecker.isInternetConnected) {
+	// // doLogin(userName, password);
+	// // } else
+	// // toastMessage(getResources().getString(
+	// // R.string.no_internet_connection_msg));
+	// //
+	// // } else
+	// // toastMessage(getResources().getString(
+	// // R.string.make_sure_privacy_policy_read_txt));
+	// // break;
+	// // case R.id.logout_button:
+	// // logoutBtn.setVisibility(View.GONE);
+	// // loginDetailTextView.setText(getResources().getString(
+	// // R.string.login_detail_view_txt));
+	// // loginLayout2.setVisibility(View.VISIBLE);
+	// // toastMessage(getResources().getString(
+	// // R.string.logout_successfully_msg));
+	// // isLoggedIn = false;
+	// // setUsernamePasswordIfSaved();
+	// // break;
+	// // }
+	//
+	// }
+	//
+	// // public void updateLoginView() {
+	// // loginLayout2.setVisibility(View.GONE);
+	// // logoutBtn.setVisibility(View.VISIBLE);
+	// // loginDetailTextView.setText(String.format("%s %s", getResources()
+	// // .getString(R.string.logged_in_info_txt), userName));
+	// // setUsernamePasswordIfSaved();
+	// // }
+	// //
+	// // public void setUsernamePasswordIfSaved() {
+	// // if (prefs.contains(USERNAME)) {
+	// // userName = prefs.getString(USERNAME, "");
+	// // password = prefs.getString(PASSWORD, "");
+	// // userNameTxt.setText(userName);
+	// // passwordTxt.setText(password);
+	// // } else {
+	// // Log.d(TAG, "No username-pass found in preferences");
+	// // }
+	// // }
+	//
+	// }
 
-	/**
-	 * LoginView class handles Login GUI (Username, passwords etc ) on the main
-	 * GUI
-	 * 
-	 * @author Yasir Ali
-	 * @version Jan 27, 2014
-	 */
-
-	private class LoginView extends LinearLayout implements
-			View.OnClickListener, OnCheckedChangeListener {
-
-		private EditText userNameTxt, passwordTxt;
-		private LinearLayout loginLayout1, loginLayout2;
-		private Button loginBtn, logoutBtn;
-		private TextView loginDetailTextView;
-		private CheckBox rememberCheckBox, agreeTermsCheckBox;
-		private String userName, password;
-		boolean isPrivacyPolicyAgreementChecked = false;
-
-		public LoginView(Context context) {
-			super(context);
-			inflate(context, R.layout.login_view, this);
-			userNameTxt = (EditText) findViewById(R.id.username_text);
-			passwordTxt = (EditText) findViewById(R.id.pass_text);
-
-			userNameTxt.setText("muses");
-			passwordTxt.setText("muses");
-			userName = userNameTxt.getText().toString();
-			password = passwordTxt.getText().toString();
-
-			loginDetailTextView = (TextView) findViewById(R.id.login_detail_text_view);
-			rememberCheckBox = (CheckBox) findViewById(R.id.remember_checkbox);
-			rememberCheckBox.setOnCheckedChangeListener(this);
-			agreeTermsCheckBox = (CheckBox) findViewById(R.id.agree_terms_checkbox);
-			agreeTermsCheckBox.setOnCheckedChangeListener(this);
-			// loginLayout1 = (LinearLayout) findViewById(R.id.login_layout_1);
-			loginLayout2 = (LinearLayout) findViewById(R.id.login_layout_2);
-			loginBtn = (Button) findViewById(R.id.login_button);
-			loginBtn.setOnClickListener(this);
-			logoutBtn = (Button) findViewById(R.id.logout_button);
-			logoutBtn.setOnClickListener(this);
-			setUsernamePasswordIfSaved();
-			populateLoggedInView();
-		}
-
-		/**
-		 * Populate logged in view if user is successfully logged in.
-		 * 
-		 */
-
-		private void populateLoggedInView() {
-			if (isLoggedIn) {
-				loginLayout2.setVisibility(View.GONE);
-				logoutBtn.setVisibility(View.VISIBLE);
-			}
-		}
-
-		@Override
-		public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
-			switch (arg0.getId()) {
-			case R.id.remember_checkbox:
-				userName = userNameTxt.getText().toString();
-				password = passwordTxt.getText().toString();
-				SharedPreferences.Editor prefEditor = prefs.edit();
-				if (isChecked) {
-					if (checkLoginInputFields(userName, password)) {
-						prefEditor.putString(USERNAME, userName);
-						prefEditor.putString(PASSWORD, password);
-						prefEditor.commit();
-					}
-				} else {
-					prefEditor.clear();
-					prefEditor.commit();
-				}
-				break;
-			case R.id.agree_terms_checkbox:
-				if (isChecked) {
-					isPrivacyPolicyAgreementChecked = true;
-				} else
-					isPrivacyPolicyAgreementChecked = false;
-				break;
-			}
-		}
-
-		/**
-		 * Handles all the button on the screen, overridden method for
-		 * onClickLitsener
-		 * 
-		 * @param View
-		 * 
-		 */
-
-		@Override
-		public void onClick(View v) {
-			switch (v.getId()) {
-			case R.id.login_button:
-				if (isPrivacyPolicyAgreementChecked) {
-					userName = userNameTxt.getText().toString();
-					password = passwordTxt.getText().toString();
-					if (NetworkChecker.isInternetConnected) {
-						doLogin(userName, password);
-					} else
-						toastMessage(getResources().getString(
-								R.string.no_internet_connection_msg));
-
-				} else
-					toastMessage(getResources().getString(
-							R.string.make_sure_privacy_policy_read_txt));
-				break;
-			case R.id.logout_button:
-				logoutBtn.setVisibility(View.GONE);
-				loginDetailTextView.setText(getResources().getString(
-						R.string.login_detail_view_txt));
-				loginLayout2.setVisibility(View.VISIBLE);
-				toastMessage(getResources().getString(
-						R.string.logout_successfully_msg));
-				isLoggedIn = false;
-				setUsernamePasswordIfSaved();
-				break;
-			}
-
-		}
-
-		public void updateLoginView() {
-			loginLayout2.setVisibility(View.GONE);
-			logoutBtn.setVisibility(View.VISIBLE);
-			loginDetailTextView.setText(String.format("%s %s", getResources()
-					.getString(R.string.logged_in_info_txt), userName));
-			setUsernamePasswordIfSaved();
-		}
-
-		public void setUsernamePasswordIfSaved() {
-			if (prefs.contains(USERNAME)) {
-				userName = prefs.getString(USERNAME, "");
-				password = prefs.getString(PASSWORD, "");
-				userNameTxt.setText(userName);
-				passwordTxt.setText(password);
-			} else {
-				Log.d(TAG, "No username-pass found in preferences");
-			}
-		}
-
-	}
-
-	/**
-	 * PrivacyPolicyView class shows privacy details on the main GUI
-	 * 
-	 * @author Yasir Ali
-	 * @version Jan 27, 2014
-	 */
-
-	private class PrivacyPolicyView extends LinearLayout {
-
-		public PrivacyPolicyView(Context context) {
-			super(context);
-			// inflate(context, R.layout.privacy_policy_view, this);
-		}
-
-	}
-
-	/**
-	 * SecurityInformationView class shows security information on the main GUI
-	 * 
-	 * @author Yasir Ali
-	 * @version Jan 27, 2014
-	 */
-
-	public class SecurityInformationView extends LinearLayout {
-
-		public SecurityInformationView(Context context) {
-			super(context);
-			// inflate(context, R.layout.security_information_view, this);
-			setSecurityInformationViewAttiributesHere();
-		}
-
-		private void setSecurityInformationViewAttiributesHere() {
-			// TBD
-		}
-
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		IsLabelingActivatedPreference.getInstance().set(
+				getApplicationContext(), isChecked);
 	}
 
 }
