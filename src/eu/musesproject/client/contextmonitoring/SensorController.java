@@ -37,8 +37,6 @@ import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.contextmonitoring.sensors.SettingsSensor;
 import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.actuators.Setting.SettingType;
-import eu.musesproject.client.model.contextmonitoring.UISource;
-import eu.musesproject.client.model.decisiontable.Action;
 import eu.musesproject.contextmodel.ContextEvent;
 
 /**
@@ -56,15 +54,12 @@ public class SensorController {
     private Context context;
 
     private Map<String, ISensor> activeSensors;
-    // stores the latest fired ContextEvent of every sensor
-    private Map<String, ContextEvent> lastFiredContextEvents;
 
     private List<ContextEvent> mAllEvents;
     
     private SensorController(Context context) {
         this.context = context;
         activeSensors = new HashMap<String, ISensor>();
-        lastFiredContextEvents = new HashMap<String, ContextEvent>();
         mAllEvents = new LinkedList<ContextEvent>();
     }
 

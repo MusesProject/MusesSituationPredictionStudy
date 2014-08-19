@@ -73,12 +73,10 @@ public class DBManager {
 					SESSION_ID_USERSELECTION_LABELING,
 					VALUE_USERSELECTION_LABELING);
 
-	private Context context;
 	private DatabaseHelper databaseHelper;
 	private SQLiteDatabase sqLiteDatabase;
 
 	public DBManager(Context context) {
-		this.context = context;
 		databaseHelper = new DatabaseHelper(context);
 	}
 
