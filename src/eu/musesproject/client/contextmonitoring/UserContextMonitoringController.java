@@ -46,7 +46,6 @@ import eu.musesproject.server.risktrust.RiskTreatment;
 public class UserContextMonitoringController implements
         IUserContextMonitoringController {
     private static UserContextMonitoringController ucmController = null;
-//    private final UserContextEventHandler uceHandler = UserContextEventHandler.getInstance();
 
     private Context context;
     
@@ -54,8 +53,6 @@ public class UserContextMonitoringController implements
 
     private UserContextMonitoringController(Context context) {
         this.context = context;
-//        uceHandler.setContext(context);
-//        uceHandler.connectToServer();
         
         requestByMusesAwareApp = false;
     }

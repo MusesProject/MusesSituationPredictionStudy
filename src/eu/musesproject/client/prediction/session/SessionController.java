@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.telephony.TelephonyManager;
+import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
 import eu.musesproject.client.prediction.DialogController;
 import eu.musesproject.client.prediction.dialog.LabelDialog;
 import eu.musesproject.client.prediction.preferences.IsLabelingActivatedPreference;
@@ -46,6 +47,8 @@ public class SessionController extends BroadcastReceiver {
 			mIsSessionRunning = false;
 			// TODO delete data for session
 			SessionDataController.getInstance(context).deleteSessionData();
+			UserContextMonitoringController.getInstance(context)
+					.stopContextObservation();
 		}
 
 		if (IsLabelingActivatedPreference.getInstance().get(context)) {
@@ -55,6 +58,9 @@ public class SessionController extends BroadcastReceiver {
 
 				// show dialog only if no session is running
 				if (!mIsSessionRunning) {
+					UserContextMonitoringController.getInstance(context)
+							.startContextObservation();
+
 					DialogController.showLabelDialog(context,
 							LabelDialog.ACTION_SESSION_START);
 					// TODO start collecting data for session (check
@@ -112,6 +118,9 @@ public class SessionController extends BroadcastReceiver {
 								}
 							}
 							mIsSessionRunning = false;
+							UserContextMonitoringController
+									.getInstance(context)
+									.stopContextObservation();
 						} else {
 							// no call, but screen is locked by the display
 							// timeout
@@ -139,6 +148,8 @@ public class SessionController extends BroadcastReceiver {
 				mIsSessionRunning = false;
 				// TODO delete data
 				SessionDataController.getInstance(context).deleteSessionData();
+				UserContextMonitoringController.getInstance(context)
+						.stopContextObservation();
 			}
 		}
 	}
