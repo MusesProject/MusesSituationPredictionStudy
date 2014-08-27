@@ -52,12 +52,15 @@ public class DataExport {
 		protected Void doInBackground(Void... params) {
 
 			if (createFileFromDb()) {
-				if (sendFile()) {
-					SessionDataController.getInstance(mContext)
-							.deleteAllSessionData();
-				} else {
+				if(!sendFile()){
 					this.cancel(true);
 				}
+//				if (sendFile()) {
+//					SessionDataController.getInstance(mContext)
+//							.deleteAllSessionData();
+//				} else {
+//					this.cancel(true);
+//				}
 			} else {
 				this.cancel(true);
 			}

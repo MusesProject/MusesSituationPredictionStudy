@@ -20,6 +20,7 @@ package eu.musesproject;
  * #L%
  */
 
+import weka.core.Attribute;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -58,7 +59,7 @@ public class MUSESBackgroundService extends Service {
 
 	@Override
 	public void onCreate() {
-		isAppInitialized = false;
+        isAppInitialized = false;
 		super.onCreate();
 	}
 
