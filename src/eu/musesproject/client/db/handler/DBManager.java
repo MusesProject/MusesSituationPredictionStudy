@@ -2,6 +2,7 @@ package eu.musesproject.client.db.handler;
 
 import java.util.Map;
 
+import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -30,14 +31,12 @@ public class DBManager {
 	public static final String ID_PROPERTY_LABELING = "_id";
 	public static final String CE_ID_PROPERTY_LABELING = "ce_id_property_labeling";
 	public static final String KEY_PROPERTY_LABELING = "key_property_labeling";
-	public static final String VALUE_PROPERTY_LABERLING = "value_property_labeling";
+	public static final String VALUE_PROPERTY_LABELING = "value_property_labeling";
 
 	// userselection table columns
 	public static final String ID_USERSELECTION_LABELING = "_id";
 	public static final String SESSION_ID_USERSELECTION_LABELING = "session_id";
 	public static final String VALUE_USERSELECTION_LABELING = "value_userselection_labeling";
-
-	
 
 	private static final String CREATE_LABELING_CONTEXTEVENT_TABLE_QUERY = String
 			.format("CREATE TABLE %s "
@@ -45,8 +44,7 @@ public class DBManager {
 					+ "%s VARCHAR(45) NOT NULL, " + "%s TIMESTAMP NOT NULL, "
 					+ "%s INTEGER NOT NULL, "
 					+ "FOREIGN KEY(%s) REFERENCES %s(%s) "
-					+ "ON DELETE CASCADE " 
-					+ ");", TABLE_CONTEXTEVENT_LABELING,
+					+ "ON DELETE CASCADE " + ");", TABLE_CONTEXTEVENT_LABELING,
 					ID_CONTEXTEVENT_LABELING, TYPE_CONTEXTEVENT_LABELING,
 					TIMESTAMP_CONTEXTEVENT_LABELING,
 					SESSION_ID_CONTEXTEVENT_LABELING,
@@ -62,14 +60,15 @@ public class DBManager {
 					+ "FOREIGN KEY(%s) REFERENCES %s(%s) "
 					+ "ON DELETE CASCADE " + ");", TABLE_PROPERTY_LABELING,
 					ID_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING,
-					KEY_PROPERTY_LABELING, VALUE_PROPERTY_LABERLING,
+					KEY_PROPERTY_LABELING, VALUE_PROPERTY_LABELING,
 					CE_ID_PROPERTY_LABELING, TABLE_CONTEXTEVENT_LABELING,
 					ID_CONTEXTEVENT_LABELING);
 
 	private static final String CREATE_LABELING_USERSELECTION_TABLE_QUERY = String
-			.format("CREATE TABLE %s " + "( %s INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ "%s INTEGER UNIQUE, "
-					+ "%s VARCHAR(20) " + ");", TABLE_USERSELECTION_LABELING, ID_USERSELECTION_LABELING,
+			.format("CREATE TABLE %s "
+					+ "( %s INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "%s INTEGER UNIQUE, " + "%s VARCHAR(20) " + ");",
+					TABLE_USERSELECTION_LABELING, ID_USERSELECTION_LABELING,
 					SESSION_ID_USERSELECTION_LABELING,
 					VALUE_USERSELECTION_LABELING);
 
@@ -140,15 +139,18 @@ public class DBManager {
 	 * Methods for prediction/label
 	 */
 
-	public boolean isSessionIdAvailable(int sessionId){
-		Cursor cursor = sqLiteDatabase.query(TABLE_USERSELECTION_LABELING,new String[]{SESSION_ID_USERSELECTION_LABELING }, String.format("%s=%d", SESSION_ID_USERSELECTION_LABELING, sessionId), null, null, null, null);
-		if(cursor.getCount() != 0){
+	public boolean isSessionIdAvailable(int sessionId) {
+		Cursor cursor = sqLiteDatabase.query(TABLE_USERSELECTION_LABELING,
+				new String[] { SESSION_ID_USERSELECTION_LABELING }, String
+						.format("%s=%d", SESSION_ID_USERSELECTION_LABELING,
+								sessionId), null, null, null, null);
+		if (cursor.getCount() != 0) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	public void insertSessionId(int sessionId) {
 		ContentValues cv = new ContentValues();
 		cv.put(SESSION_ID_USERSELECTION_LABELING, sessionId);
@@ -169,25 +171,28 @@ public class DBManager {
 				ContentValues propCv = new ContentValues();
 				propCv.put(CE_ID_PROPERTY_LABELING, rowId);
 				propCv.put(KEY_PROPERTY_LABELING, entry.getKey());
-				propCv.put(VALUE_PROPERTY_LABERLING, entry.getValue());
+				propCv.put(VALUE_PROPERTY_LABELING, entry.getValue());
 				sqLiteDatabase.insert(TABLE_PROPERTY_LABELING, null, propCv);
 			}
 		}
 	}
 
-	public void deleteSessionData(int sessionId) {
-		sqLiteDatabase.delete(TABLE_USERSELECTION_LABELING, String.format(
-				"%s=%s", SESSION_ID_USERSELECTION_LABELING, sessionId), null);
+	public int deleteSessionData(int sessionId) {
+		return sqLiteDatabase.delete(TABLE_USERSELECTION_LABELING, String
+				.format("%s=%s", SESSION_ID_USERSELECTION_LABELING, sessionId),
+				null);
 	}
-	
-	public void deleteAllSessionData(){
-		sqLiteDatabase.delete(TABLE_USERSELECTION_LABELING, null,null);
+
+	public void deleteAllSessionData() {
+		sqLiteDatabase.delete(TABLE_USERSELECTION_LABELING, null, null);
 	}
 
 	public void storeUserSelection(int sessionId, String selection) {
 		ContentValues cv = new ContentValues();
 		cv.put(VALUE_USERSELECTION_LABELING, selection);
-		sqLiteDatabase.update(TABLE_USERSELECTION_LABELING, cv, String.format("%s.%s=%s", TABLE_USERSELECTION_LABELING, SESSION_ID_USERSELECTION_LABELING, sessionId), null);
+		sqLiteDatabase.update(TABLE_USERSELECTION_LABELING, cv, String.format(
+				"%s.%s=%s", TABLE_USERSELECTION_LABELING,
+				SESSION_ID_USERSELECTION_LABELING, sessionId), null);
 	}
 
 	public Cursor getAllLabeledData() {
@@ -200,7 +205,7 @@ public class DBManager {
 				TABLE_CONTEXTEVENT_LABELING, TYPE_CONTEXTEVENT_LABELING,
 				TABLE_CONTEXTEVENT_LABELING, TIMESTAMP_CONTEXTEVENT_LABELING,
 				TABLE_PROPERTY_LABELING, KEY_PROPERTY_LABELING,
-				TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABERLING)
+				TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING)
 				+ String.format("FROM %s, %s, %s ",
 						TABLE_USERSELECTION_LABELING,
 						TABLE_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING)
@@ -213,5 +218,20 @@ public class DBManager {
 						TABLE_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING);
 
 		return sqLiteDatabase.rawQuery(query, null);
+	}
+
+	public Cursor getAllUsedAppNames() {
+//		final String query = String.format("SELECT DISTINCT %s.%s ",
+//				TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING)
+//				+ String.format("FROM %s ", TABLE_PROPERTY_LABELING)
+//				+ String.format("WHERE %s.%s=%s ;", TABLE_PROPERTY_LABELING,
+//						KEY_PROPERTY_LABELING, AppSensor.PROPERTY_KEY_APP_NAME);
+		return sqLiteDatabase
+				.query(true, TABLE_PROPERTY_LABELING,
+						new String[] { VALUE_PROPERTY_LABELING }, String
+								.format("%s.%s=%s", TABLE_PROPERTY_LABELING,
+										KEY_PROPERTY_LABELING,
+										AppSensor.PROPERTY_KEY_APP_NAME), null,
+						null, null, null, null);
 	}
 }

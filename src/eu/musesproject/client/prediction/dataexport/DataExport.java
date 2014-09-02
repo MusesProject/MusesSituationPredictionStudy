@@ -131,7 +131,7 @@ public class DataExport {
 								.getColumnIndex(DBManager.KEY_PROPERTY_LABELING))
 								+ ";");
 						csvFile.append(cursor.getString(cursor
-								.getColumnIndex(DBManager.VALUE_PROPERTY_LABERLING))
+								.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING))
 								+ ";");
 						csvFile.append("\n");
 

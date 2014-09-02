@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Context;
 import eu.musesproject.client.contextmonitoring.SensorController;
 import eu.musesproject.client.db.handler.DBManager;
+import eu.musesproject.client.prediction.preferences.ModelCountPreference;
 import eu.musesproject.contextmodel.ContextEvent;
 
 public class SessionDataController {
@@ -48,6 +49,8 @@ public class SessionDataController {
 		mDBManager.closeDB();
 		
 		mDataDeleted = false;
+		
+		ModelCountPreference.getInstance().increment(mContext);
 	}
 
 	public void storeSessionData() {
@@ -70,7 +73,10 @@ public class SessionDataController {
 	public void deleteSessionData() {
 		// delete from db (ref sessionid)
 		mDBManager.openDB();
-		mDBManager.deleteSessionData(SessionIdGenerator.getCurrentSessionId(mContext));
+		int result = mDBManager.deleteSessionData(SessionIdGenerator.getCurrentSessionId(mContext));
+		if(result != 0){
+			ModelCountPreference.getInstance().decrement(mContext);
+		}
 		mDBManager.closeDB();
 	}
 	

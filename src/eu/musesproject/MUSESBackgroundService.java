@@ -20,7 +20,6 @@ package eu.musesproject;
  * #L%
  */
 
-import weka.core.Attribute;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;

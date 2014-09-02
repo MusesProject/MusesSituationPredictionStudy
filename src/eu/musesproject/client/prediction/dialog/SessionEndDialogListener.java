@@ -1,5 +1,6 @@
 package eu.musesproject.client.prediction.dialog;
 
+import eu.musesproject.client.classification.ClassificationModelController;
 import eu.musesproject.client.prediction.session.SessionDataController;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -24,11 +25,17 @@ public class SessionEndDialogListener implements OnClickListener {
 		case DialogInterface.BUTTON_NEGATIVE:
 			// professional, store
 			SessionDataController.getInstance(mActivity.getApplicationContext()).storeUserSelection(LabelDialog.USER_SELECTION_PROFESSIONAL);
+			
+			// try to build the model
+			ClassificationModelController.getInstance(mActivity.getApplicationContext()).buildModel();
 			break;
 
 		case DialogInterface.BUTTON_POSITIVE:
 			// private, store
 			SessionDataController.getInstance(mActivity.getApplicationContext()).storeUserSelection(LabelDialog.USER_SELECTION_PRIVATE);
+			
+			//try to build the model
+			ClassificationModelController.getInstance(mActivity.getApplicationContext()).buildModel();
 			break;
 
 		case DialogInterface.BUTTON_NEUTRAL:

@@ -47,15 +47,15 @@ public class FileSensor implements ISensor {
     public static final String PROPERTY_KEY_PATH 		= "path";
 
     // possible events
-    public static final String OPEN  	 	 = "open";
+    public static final String OPEN  	 	 = "open"; // ok
     public static final String ATTRIB 	 	 = "metadata";
     public static final String ACCESS 		 = "access";
-    public static final String CREATE 		 = "create";
-    public static final String DELETE 		 = "delete";
-    public static final String MODIFY 		 = "modify";
-    public static final String MOVED_FROM 	 = "moved_from";
-    public static final String MOVED_TO 	 = "moved_to";
-    public static final String MOVE_SELF 	 = "move_self";
+    public static final String CREATE 		 = "create"; // ok
+    public static final String DELETE 		 = "delete"; // ok
+    public static final String MODIFY 		 = "modify"; // ok
+    public static final String MOVED_FROM 	 = "moved_from"; // summarized to moved
+    public static final String MOVED_TO 	 = "moved_to"; // summarized to moved
+    public static final String MOVE_SELF 	 = "move_self"; // summarized to moved
     public static final String CLOSE_WRITE   = "close_write";
     public static final String CLOSE_NOWRITE = "close_no_write";
 

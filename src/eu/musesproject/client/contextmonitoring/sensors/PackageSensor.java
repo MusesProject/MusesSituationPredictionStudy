@@ -59,7 +59,7 @@ public class PackageSensor implements ISensor {
 
     // context property keys
     public static final String PROPERTY_KEY_ID 					= "id";
-    public static final String PROPERTY_KEY_PACKAGE_STATUS		= "packagestatus";
+    public static final String PROPERTY_KEY_PACKAGE_STATUS		= "packagestatus"; // ok
     public static final String PROPERTY_KEY_PACKAGE_NAME		= "packagename";
     public static final String PROPERTY_KEY_APP_NAME 			= "appname";
     public static final String PROPERTY_KEY_APP_VERSION			= "appversion";

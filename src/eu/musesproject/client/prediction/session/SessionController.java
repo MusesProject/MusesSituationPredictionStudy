@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.telephony.TelephonyManager;
+import eu.musesproject.client.classification.ClassificationModelController;
 import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
 import eu.musesproject.client.prediction.DialogController;
 import eu.musesproject.client.prediction.dialog.LabelDialog;
@@ -58,16 +59,7 @@ public class SessionController extends BroadcastReceiver {
 
 				// show dialog only if no session is running
 				if (!mIsSessionRunning) {
-					UserContextMonitoringController.getInstance(context)
-							.startContextObservation();
-
-					DialogController.showLabelDialog(context,
-							LabelDialog.ACTION_SESSION_START);
-					// TODO start collecting data for session (check
-					// sessionid)
-					SessionDataController.getInstance(context)
-							.startDataCollecting();
-					mIsSessionRunning = true;
+					startSession(context);
 				}
 			} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
 
@@ -102,6 +94,8 @@ public class SessionController extends BroadcastReceiver {
 									SessionDataController.getInstance(context)
 											.storeSessionData();
 								}
+								
+								ClassificationModelController.getInstance(context).buildModel();
 							} else {
 								// user hasn't labeled the session, ask him
 								// again
@@ -152,6 +146,20 @@ public class SessionController extends BroadcastReceiver {
 						.stopContextObservation();
 			}
 		}
+	}
+
+	private void startSession(Context context) {
+		UserContextMonitoringController.getInstance(context)
+				.startContextObservation();
+
+		SessionDataController.getInstance(context)
+		.startDataCollecting();
+		
+		DialogController.showLabelDialog(context,
+				LabelDialog.ACTION_SESSION_START);
+		// TODO start collecting data for session (check
+		// sessionid)
+		mIsSessionRunning = true;
 	}
 
 	private void quitDeleteSessionDataTimer(Context context) {

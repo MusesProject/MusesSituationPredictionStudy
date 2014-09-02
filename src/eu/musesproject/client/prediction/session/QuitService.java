@@ -1,6 +1,5 @@
 package eu.musesproject.client.prediction.session;
 
-import eu.musesproject.client.contextmonitoring.SensorController;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
