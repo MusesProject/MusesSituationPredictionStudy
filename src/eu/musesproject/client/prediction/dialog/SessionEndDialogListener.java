@@ -27,7 +27,8 @@ public class SessionEndDialogListener implements OnClickListener {
 			SessionDataController.getInstance(mActivity.getApplicationContext()).storeUserSelection(LabelDialog.USER_SELECTION_PROFESSIONAL);
 			
 			// try to build the model
-			ClassificationModelController.getInstance(mActivity.getApplicationContext()).buildModel();
+			// TODO activate
+//			ClassificationModelController.getInstance(mActivity.getApplicationContext()).buildModel();
 			break;
 
 		case DialogInterface.BUTTON_POSITIVE:
@@ -35,7 +36,8 @@ public class SessionEndDialogListener implements OnClickListener {
 			SessionDataController.getInstance(mActivity.getApplicationContext()).storeUserSelection(LabelDialog.USER_SELECTION_PRIVATE);
 			
 			//try to build the model
-			ClassificationModelController.getInstance(mActivity.getApplicationContext()).buildModel();
+			// TODO activate
+//			ClassificationModelController.getInstance(mActivity.getApplicationContext()).buildModel();
 			break;
 
 		case DialogInterface.BUTTON_NEUTRAL:

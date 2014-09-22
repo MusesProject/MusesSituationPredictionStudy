@@ -60,6 +60,8 @@ public class SessionController extends BroadcastReceiver {
 				// show dialog only if no session is running
 				if (!mIsSessionRunning) {
 					startSession(context);
+					// TODO test
+					ClassificationModelController.getInstance(context).buildModel();
 				}
 			} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
 
@@ -94,8 +96,8 @@ public class SessionController extends BroadcastReceiver {
 									SessionDataController.getInstance(context)
 											.storeSessionData();
 								}
-								
-								ClassificationModelController.getInstance(context).buildModel();
+								// TODO activate
+//								ClassificationModelController.getInstance(context).buildModel();
 							} else {
 								// user hasn't labeled the session, ask him
 								// again

@@ -2,7 +2,6 @@ package eu.musesproject.client.db.handler;
 
 import java.util.Map;
 
-import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -219,19 +218,41 @@ public class DBManager {
 
 		return sqLiteDatabase.rawQuery(query, null);
 	}
+	
+	public Cursor getAllLabeledDataForSessionId(int sessionId) {
+		final String query = String.format(
+				"SELECT %s.%s, %s.%s, %s.%s, %s.%s, %s.%s, %s.%s, %s.%s ",
+				TABLE_USERSELECTION_LABELING,
+				SESSION_ID_USERSELECTION_LABELING,
+				TABLE_USERSELECTION_LABELING, VALUE_USERSELECTION_LABELING,
+				TABLE_CONTEXTEVENT_LABELING, ID_CONTEXTEVENT_LABELING,
+				TABLE_CONTEXTEVENT_LABELING, TYPE_CONTEXTEVENT_LABELING,
+				TABLE_CONTEXTEVENT_LABELING, TIMESTAMP_CONTEXTEVENT_LABELING,
+				TABLE_PROPERTY_LABELING, KEY_PROPERTY_LABELING,
+				TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING)
+				+ String.format("FROM %s, %s, %s ",
+						TABLE_USERSELECTION_LABELING,
+						TABLE_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING)
+				+ String.format("WHERE %s.%s=%d AND %s.%s=%s.%s AND %s.%s=%s.%s ",
+						TABLE_USERSELECTION_LABELING, SESSION_ID_USERSELECTION_LABELING, sessionId,
+						TABLE_USERSELECTION_LABELING,
+						SESSION_ID_USERSELECTION_LABELING,
+						TABLE_CONTEXTEVENT_LABELING,
+						SESSION_ID_CONTEXTEVENT_LABELING,
+						TABLE_CONTEXTEVENT_LABELING, ID_CONTEXTEVENT_LABELING,
+						TABLE_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING);
+
+		return sqLiteDatabase.rawQuery(query, null);
+	}
 
 	public Cursor getAllUsedAppNames() {
-//		final String query = String.format("SELECT DISTINCT %s.%s ",
-//				TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING)
-//				+ String.format("FROM %s ", TABLE_PROPERTY_LABELING)
-//				+ String.format("WHERE %s.%s=%s ;", TABLE_PROPERTY_LABELING,
-//						KEY_PROPERTY_LABELING, AppSensor.PROPERTY_KEY_APP_NAME);
-		return sqLiteDatabase
-				.query(true, TABLE_PROPERTY_LABELING,
-						new String[] { VALUE_PROPERTY_LABELING }, String
-								.format("%s.%s=%s", TABLE_PROPERTY_LABELING,
-										KEY_PROPERTY_LABELING,
-										AppSensor.PROPERTY_KEY_APP_NAME), null,
-						null, null, null, null);
+		// final String query = String.format("SELECT DISTINCT %s.%s ",
+		// TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING)
+		// + String.format("FROM %s ", TABLE_PROPERTY_LABELING)
+		// + String.format("WHERE %s.%s=%s ;", TABLE_PROPERTY_LABELING,
+		// KEY_PROPERTY_LABELING, AppSensor.PROPERTY_KEY_APP_NAME);
+		return sqLiteDatabase.query(TABLE_PROPERTY_LABELING, new String[] {
+				KEY_PROPERTY_LABELING, VALUE_PROPERTY_LABELING }, null, null,
+				null, null, null);
 	}
 }

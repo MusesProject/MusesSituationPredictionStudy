@@ -21,4 +21,8 @@ public class SessionIdGenerator {
 		SessionIdPreference.getInstance().set(context, ++oldSessionId);
 		return oldSessionId;
 	}
+	
+	public static int getMaxSessionId(Context context) {
+		return getCurrentSessionId(context);
+	}
 }

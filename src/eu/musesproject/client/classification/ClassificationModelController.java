@@ -2,39 +2,88 @@ package eu.musesproject.client.classification;
 
 import java.util.ArrayList;
 
-import weka.core.Attribute;
+import weka.classifiers.Classifier;
 import weka.core.FastVector;
+import weka.core.Instances;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.BatteryManager;
 import eu.musesproject.MUSESBackgroundService;
+import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
 import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.db.handler.DBManager;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
+import eu.musesproject.client.prediction.dialog.LabelDialog;
 import eu.musesproject.client.prediction.preferences.ModelCountPreference;
 import eu.musesproject.contextmodel.PackageStatus;
 
 public class ClassificationModelController {
 
-	public static final String FILESENSOR_MOVED = "moved";
-
-	public static final String NONE_STRING = "none";
-
-	public static final String TRUE = "true";
-	public static final String FALSE = "false";
+	
 
 	private static ClassificationModelController mInstance;
 	private Context mContext;
+
 	
-	private ArrayList<Attribute> mAttributesList;
+	private Classifier mClassifier;
+
+	private ArrayList<String> mAllAppNames;
+	private ModelBuilder mModelBuilder;
+	private TrainingSetBuilder mTrainingSetBuilder;
+	
+
+
+	public static class MODEL_DATA {
+
+		public static final String MODEL_IDENTIFIER_NB = "naive_bayes_classifier";
+		
+		public static final String NONE_STRING = "none";
+
+		public static final String TRUE = "true";
+		public static final String FALSE = "false";
+
+		public static final String FILESENSOR_ATTRIBUTE_NAME = FileSensor.PROPERTY_KEY_FILE_EVENT;
+		public static final String FILESENSOR_MOVED = "moved";
+		public static final String FILESENSOR_OPEN = FileSensor.OPEN;
+		public static final String FILESENSOR_MODIFY = FileSensor.MODIFY;
+		public static final String FILESENSOR_CREATE = FileSensor.CREATE;
+		public static final String FILESENSOR_DELETE = FileSensor.DELETE;
+
+		public static final String MOBILE_CONNECTED_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED;
+		public static final String WIFI_ENABLED_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED;
+		public static final String WIFI_CONNECTED_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED;
+		public static final String WIFI_NEIGHBORS_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS;
+
+		public static final String BLUETOOTH_CONNECTED_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED;
+		public static final String BLUETOOTH_TRUE = BluetoothState.TRUE
+				.toString();
+		public static final String BLUETOOTH_FALSE = BluetoothState.FALSE
+				.toString();
+		public static final String BLUETOOTH_NOT_SUPPORTED = BluetoothState.NOT_SUPPORTED
+				.toString();
+
+		public static final String HIDDEN_SSID_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID;
+		public static final String AIRPLANE_MODE_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE;
+
+		public static final String PACKAGE_STATUS_ATTRIBUTE_NAME = PackageSensor.PROPERTY_KEY_PACKAGE_STATUS;
+		public static final String PACKAGE_STATUS_INSTALLED = PackageStatus.INSTALLED
+				.toString();
+		public static final String PACKAGE_STATUS_REMOVED = PackageStatus.REMOVED
+				.toString();
+		public static final String PACKAGE_STATUS_UPDATED = PackageStatus.UPDATED
+				.toString();
+
+		public static final String USER_SELECTION_ATTRIBUTE_NAME = DBManager.VALUE_USERSELECTION_LABELING;
+		public static final String USER_SELECTION_PRIVATE = LabelDialog.USER_SELECTION_PRIVATE;
+		public static final String USER_SELECTION_PROFESSIONAL = LabelDialog.USER_SELECTION_PROFESSIONAL;
+	}
 
 	private ClassificationModelController(Context context) {
 		mContext = context;
-		mAttributesList = new ArrayList<Attribute>();
 	}
 
 	public static ClassificationModelController getInstance(Context context) {
@@ -49,149 +98,68 @@ public class ClassificationModelController {
 		if (checkChargingStatus()) {
 
 			// check if we reached 100 new datarecords (min)
-			if (ModelCountPreference.getInstance().get(mContext) >= 100) {
+			if (ModelCountPreference.getInstance().get(mContext) >= 2) {
 				// disable background service
-				Intent stopIntent = new Intent(mContext,
-						MUSESBackgroundService.class);
-				mContext.stopService(stopIntent);
+//				Intent stopIntent = new Intent(mContext,
+//						MUSESBackgroundService.class);
+//				mContext.stopService(stopIntent);
 
-				// create model to train
-
-				// attribute for filesensor
-				// TODO one path for every sensor (need to query db)
-				FastVector fileSensorVector = new FastVector(6);
-				fileSensorVector.addElement(FileSensor.OPEN);
-				fileSensorVector.addElement(FileSensor.MODIFY);
-				fileSensorVector.addElement(FileSensor.CREATE);
-				fileSensorVector.addElement(FileSensor.DELETE);
-				fileSensorVector.addElement(FILESENSOR_MOVED);
-				fileSensorVector.addElement(NONE_STRING);
-				Attribute fileSensorAttribute = new Attribute(
-						FileSensor.PROPERTY_KEY_FILE_EVENT, fileSensorVector);
-				
-				mAttributesList.add(fileSensorAttribute);
-
-				
-				// connectivity sensor, one attribute for every property
-				FastVector mobileConnectedVector = new FastVector(2);
-				mobileConnectedVector.addElement(TRUE);
-				mobileConnectedVector.addElement(FALSE);
-				Attribute mobileConnectedAttribute = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED,
-						mobileConnectedVector);
-				
-				mAttributesList.add(mobileConnectedAttribute);
-
-				FastVector wifiEnabledVector = new FastVector(2);
-				wifiEnabledVector.addElement(TRUE);
-				wifiEnabledVector.addElement(FALSE);
-				Attribute wifiEnabledAttribute = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED,
-						wifiEnabledVector);
-				
-				mAttributesList.add(wifiEnabledAttribute);
-
-				FastVector wifiConnectedVector = new FastVector(2);
-				wifiConnectedVector.addElement(TRUE);
-				wifiConnectedVector.addElement(FALSE);
-				Attribute wifiConnectedAttribute = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED,
-						wifiConnectedVector);
-
-				mAttributesList.add(wifiConnectedAttribute);
-				
-				Attribute wifiNeighborsAttribute = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS);
-				
-				mAttributesList.add(wifiNeighborsAttribute);
-
-				FastVector hiddenSSIDVector = new FastVector(2);
-				hiddenSSIDVector.addElement(TRUE);
-				hiddenSSIDVector.addElement(FALSE);
-				Attribute hiddenSSIDAttribute = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID,
-						hiddenSSIDVector);
-
-				mAttributesList.add(hiddenSSIDAttribute);
-				
-				FastVector bluetoothStatusVector = new FastVector(3);
-				bluetoothStatusVector.addElement(BluetoothState.TRUE);
-				bluetoothStatusVector.addElement(BluetoothState.FALSE);
-				bluetoothStatusVector.addElement(BluetoothState.NOT_SUPPORTED);
-				Attribute bluetoothStatusAttribute = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED,
-						bluetoothStatusVector);
-				
-				mAttributesList.add(bluetoothStatusAttribute);
-
-				FastVector airplaneModeVector = new FastVector(2);
-				airplaneModeVector.addElement(TRUE);
-				airplaneModeVector.addElement(FALSE);
-				Attribute airplaneModeAttribtue = new Attribute(
-						ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE,
-						airplaneModeVector);
-
-				mAttributesList.add(airplaneModeAttribtue);
-				
-				// package sensor
-				FastVector packageStatusVektor = new FastVector(3);
-				packageStatusVektor.addElement(PackageStatus.INSTALLED);
-				packageStatusVektor.addElement(PackageStatus.REMOVED);
-				packageStatusVektor.addElement(PackageStatus.UPDATED);
-				Attribute packageStatusAttribute = new Attribute(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS, packageStatusVektor);
-				
-				mAttributesList.add(packageStatusAttribute);
-				
+				// open DB connection
 				DBManager dbManager = new DBManager(mContext);
 				dbManager.openDB();
-				Cursor allUsedApps = dbManager.getAllUsedAppNames();
-				
-				
-				// add all the attributes to one feature vector
-				FastVector allAttributesVector = new FastVector(mAttributesList.size() + allUsedApps.getCount());
-				
-				for(Attribute a : mAttributesList){
-					allAttributesVector.addElement(a);
-				}
-				
-				
-				// for app sensor, check every app that was used and build an
-				// attribute for EVERY used app with values true and false
-				
-				if(allUsedApps.moveToFirst()){
-					do{
-						FastVector appNameVector = new FastVector(2);
-						appNameVector.addElement(TRUE);
-						appNameVector.addElement(FALSE);
-						Attribute appNameAttribute = new Attribute(allUsedApps.getString(allUsedApps.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING)), appNameVector);
-						allAttributesVector.addElement(appNameAttribute);						
-					} while (allUsedApps.moveToNext());
-				}
-				
-				// fill the model
-				Cursor allDataCursor = dbManager.getAllLabeledData();
-				if (allDataCursor.moveToFirst()) {
-					do {
-						String type = allDataCursor
-								.getString(allDataCursor
-										.getColumnIndex(DBManager.TYPE_CONTEXTEVENT_LABELING));
-						if (type.equals(FileSensor.TYPE)) {
 
-						}
+				// get all app names to create an attribute for each of them in feature vector
+				mAllAppNames = getAllUsedAppNames(dbManager);
+				
+				// create instance of ModelBuilder
+				mModelBuilder = new ModelBuilder();
+				
+				// get feature vector
+				FastVector allAttributesVector = mModelBuilder.createFeatureVector(mAllAppNames);
 
-					} while (allDataCursor.moveToNext());
+				
+				// create instance of TrainingSetBuilder
+				mTrainingSetBuilder = new TrainingSetBuilder();
+				
+				// create training set
+				Instances trainingSet = mTrainingSetBuilder.createTrainingSet(mContext, dbManager,
+						allAttributesVector, mModelBuilder.getClassIndex());
 
-				}
-
-				// end work
-				allDataCursor.close();
 				dbManager.closeDB();
 
-				Intent startIntent = new Intent(mContext,
-						MUSESBackgroundService.class);
-				mContext.startService(startIntent);
+				mClassifier = mModelBuilder.trainClassifier(trainingSet);
+				
+//				Intent startIntent = new Intent(mContext,
+//						MUSESBackgroundService.class);
+//				mContext.startService(startIntent);
 			}
 		}
+	}
+
+	
+
+	
+
+	private ArrayList<String> getAllUsedAppNames(DBManager dbManager) {
+		Cursor allUsedApps = dbManager.getAllUsedAppNames();
+		ArrayList<String> array = new ArrayList<String>();
+		if (allUsedApps.moveToFirst()) {
+			do {
+				String key = allUsedApps.getString(allUsedApps
+						.getColumnIndex(DBManager.KEY_PROPERTY_LABELING));
+				if (key.equals(AppSensor.PROPERTY_KEY_APP_NAME)) {
+
+					String appName = allUsedApps.getString(allUsedApps
+							.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+					if (!array.contains(appName))
+						array.add(appName);
+				}
+			} while (allUsedApps.moveToNext());
+		}
+
+		allUsedApps.close();
+
+		return array;
 	}
 
 	private boolean checkChargingStatus() {
