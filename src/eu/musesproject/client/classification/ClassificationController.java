@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.BatteryManager;
-import eu.musesproject.MUSESBackgroundService;
 import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
@@ -21,13 +20,10 @@ import eu.musesproject.client.prediction.dialog.LabelDialog;
 import eu.musesproject.client.prediction.preferences.ModelCountPreference;
 import eu.musesproject.contextmodel.PackageStatus;
 
-public class ClassificationModelController {
+public class ClassificationController {
 
-	
-
-	private static ClassificationModelController mInstance;
+	private static ClassificationController mInstance;
 	private Context mContext;
-
 	
 	private Classifier mClassifier;
 
@@ -35,7 +31,6 @@ public class ClassificationModelController {
 	private ModelBuilder mModelBuilder;
 	private TrainingSetBuilder mTrainingSetBuilder;
 	
-
 
 	public static class MODEL_DATA {
 
@@ -82,13 +77,13 @@ public class ClassificationModelController {
 		public static final String USER_SELECTION_PROFESSIONAL = LabelDialog.USER_SELECTION_PROFESSIONAL;
 	}
 
-	private ClassificationModelController(Context context) {
+	private ClassificationController(Context context) {
 		mContext = context;
 	}
 
-	public static ClassificationModelController getInstance(Context context) {
+	public static ClassificationController getInstance(Context context) {
 		if (mInstance == null) {
-			mInstance = new ClassificationModelController(context);
+			mInstance = new ClassificationController(context);
 		}
 		return mInstance;
 	}
@@ -138,7 +133,9 @@ public class ClassificationModelController {
 
 	
 
-	
+	public String classifyDataRecord(int sessionId){
+		return null;
+	}
 
 	private ArrayList<String> getAllUsedAppNames(DBManager dbManager) {
 		Cursor allUsedApps = dbManager.getAllUsedAppNames();

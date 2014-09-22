@@ -14,7 +14,7 @@ public class SessionDataController {
 	private DBManager mDBManager;
 	private Context mContext;
 	private long mSessionStartTimestamp;
-	
+
 	// workaround flag to indicate that all data has been deleted
 	private boolean mDataDeleted = false;
 
@@ -23,18 +23,17 @@ public class SessionDataController {
 		mDBManager = new DBManager(context);
 	}
 
-	public static SessionDataController getInstance(Context context){
-		if (mInstance == null)
-		{
+	public static SessionDataController getInstance(Context context) {
+		if (mInstance == null) {
 			mInstance = new SessionDataController(context);
 		}
 		return mInstance;
 	}
-	
+
 	public void startDataCollecting() {
 		// reset the list with all contextevents
 		SensorController.getInstance(mContext).resetAllContextEvents();
-		
+
 		// get timestamp of session start
 		mSessionStartTimestamp = System.currentTimeMillis();
 
@@ -43,14 +42,20 @@ public class SessionDataController {
 		// SensorController.getInstance(mContext);
 
 		// create a new entry with sessionid in userselection table
-		mDBManager.openDB();
-		mDBManager
-				.insertSessionId(SessionIdGenerator.setNewSessionId(mContext));
-		mDBManager.closeDB();
-		
+		insertNewSessionId();
 		mDataDeleted = false;
-		
-		ModelCountPreference.getInstance().increment(mContext);
+
+	}
+
+	private void insertNewSessionId() {
+		mDBManager.openDB();
+		long result = mDBManager.insertSessionId(SessionIdGenerator
+				.setNewSessionId(mContext));
+
+		if (result != -1) {
+			ModelCountPreference.getInstance().increment(mContext);
+		}
+		mDBManager.closeDB();
 	}
 
 	public void storeSessionData() {
@@ -73,28 +78,30 @@ public class SessionDataController {
 	public void deleteSessionData() {
 		// delete from db (ref sessionid)
 		mDBManager.openDB();
-		int result = mDBManager.deleteSessionData(SessionIdGenerator.getCurrentSessionId(mContext));
-		if(result != 0){
+		int result = mDBManager.deleteSessionData(SessionIdGenerator
+				.getCurrentSessionId(mContext));
+		if (result != 0) {
 			ModelCountPreference.getInstance().decrement(mContext);
 		}
 		mDBManager.closeDB();
 	}
-	
-	public void storeUserSelection(String selection){
+
+	public void storeUserSelection(String selection) {
 		mDBManager.openDB();
-		mDBManager.storeUserSelection(SessionIdGenerator.getCurrentSessionId(mContext),selection);
-		mDBManager.closeDB();	
+		mDBManager.storeUserSelection(
+				SessionIdGenerator.getCurrentSessionId(mContext), selection);
+		mDBManager.closeDB();
 	}
 
 	public void deleteAllSessionData() {
 		mDBManager.openDB();
 		mDBManager.deleteAllSessionData();
 		mDBManager.closeDB();
-		
+
 		mDataDeleted = true;
 	}
-	
-	public boolean isDataDeleted(){
+
+	public boolean isDataDeleted() {
 		return mDataDeleted;
 	}
 }

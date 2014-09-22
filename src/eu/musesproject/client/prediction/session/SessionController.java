@@ -12,7 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import eu.musesproject.client.classification.ClassificationModelController;
+import eu.musesproject.client.classification.ClassificationController;
 import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
 import eu.musesproject.client.prediction.DialogController;
 import eu.musesproject.client.prediction.dialog.LabelDialog;
@@ -61,7 +61,7 @@ public class SessionController extends BroadcastReceiver {
 				if (!mIsSessionRunning) {
 					startSession(context);
 					// TODO test
-					ClassificationModelController.getInstance(context).buildModel();
+//					ClassificationController.getInstance(context).buildModel();
 				}
 			} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
 
@@ -97,7 +97,7 @@ public class SessionController extends BroadcastReceiver {
 											.storeSessionData();
 								}
 								// TODO activate
-//								ClassificationModelController.getInstance(context).buildModel();
+								ClassificationController.getInstance(context).buildModel();
 							} else {
 								// user hasn't labeled the session, ask him
 								// again

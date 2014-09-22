@@ -7,7 +7,7 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instances;
-import eu.musesproject.client.classification.ClassificationModelController.MODEL_DATA;
+import eu.musesproject.client.classification.ClassificationController.MODEL_DATA;
 
 public class ModelBuilder {
 

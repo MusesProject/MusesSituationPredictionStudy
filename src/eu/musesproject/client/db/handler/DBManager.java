@@ -150,10 +150,11 @@ public class DBManager {
 		return false;
 	}
 
-	public void insertSessionId(int sessionId) {
+	public long insertSessionId(int sessionId) {
 		ContentValues cv = new ContentValues();
 		cv.put(SESSION_ID_USERSELECTION_LABELING, sessionId);
-		sqLiteDatabase.insert(TABLE_USERSELECTION_LABELING, null, cv);
+		return sqLiteDatabase.insert(TABLE_USERSELECTION_LABELING, null, cv);
+
 	}
 
 	public void insertLabelContextEvent(
@@ -218,7 +219,7 @@ public class DBManager {
 
 		return sqLiteDatabase.rawQuery(query, null);
 	}
-	
+
 	public Cursor getAllLabeledDataForSessionId(int sessionId) {
 		final String query = String.format(
 				"SELECT %s.%s, %s.%s, %s.%s, %s.%s, %s.%s, %s.%s, %s.%s ",
@@ -233,8 +234,10 @@ public class DBManager {
 				+ String.format("FROM %s, %s, %s ",
 						TABLE_USERSELECTION_LABELING,
 						TABLE_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING)
-				+ String.format("WHERE %s.%s=%d AND %s.%s=%s.%s AND %s.%s=%s.%s ",
-						TABLE_USERSELECTION_LABELING, SESSION_ID_USERSELECTION_LABELING, sessionId,
+				+ String.format(
+						"WHERE %s.%s=%d AND %s.%s=%s.%s AND %s.%s=%s.%s ",
+						TABLE_USERSELECTION_LABELING,
+						SESSION_ID_USERSELECTION_LABELING, sessionId,
 						TABLE_USERSELECTION_LABELING,
 						SESSION_ID_USERSELECTION_LABELING,
 						TABLE_CONTEXTEVENT_LABELING,
