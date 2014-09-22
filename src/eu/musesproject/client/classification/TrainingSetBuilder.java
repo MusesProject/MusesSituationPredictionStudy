@@ -85,21 +85,17 @@ public class TrainingSetBuilder {
 			FastVector allAttributesVector) {
 		for (TrackingObject to : mTrackingArray) {
 			if (!to.mInserted) {
-
-				try {
-
+				if (to.mAttributeName
+						.equals(FileSensor.PROPERTY_KEY_FILE_EVENT)) {
+					
+					// no true/false value
+					instance.setValue((Attribute) allAttributesVector
+							.elementAt(getIndexOfAttribute(to.mAttributeName)),
+							MODEL_DATA.NONE_STRING);
+				} else {
 					instance.setValue((Attribute) allAttributesVector
 							.elementAt(getIndexOfAttribute(to.mAttributeName)),
 							MODEL_DATA.FALSE);
-				} catch (Exception e) {
-					// TODO better handling
-					if (to.mAttributeName
-							.equals(FileSensor.PROPERTY_KEY_FILE_EVENT)) {
-						instance.setValue(
-								(Attribute) allAttributesVector
-										.elementAt(getIndexOfAttribute(to.mAttributeName)),
-								MODEL_DATA.NONE_STRING);
-					}
 				}
 
 			}
@@ -303,7 +299,7 @@ public class TrainingSetBuilder {
 
 	private String getPackageStatusValue(Cursor cursor) {
 		PackageStatus value = null;
-		
+
 		try {
 			String cursorValue = cursor.getString(cursor
 					.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
