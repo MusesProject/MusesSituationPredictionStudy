@@ -1,24 +1,14 @@
 package eu.musesproject.client.classification;
 
-import java.io.File;
-import java.util.ArrayList;
-
-import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import android.content.Context;
 import android.database.Cursor;
 import eu.musesproject.client.classification.ClassificationController.MODEL_DATA;
-import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
-import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
-import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
-import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.db.handler.DBManager;
-import eu.musesproject.client.model.contextmonitoring.BluetoothState;
 import eu.musesproject.client.prediction.preferences.LastSessionIdForModelPreference;
 import eu.musesproject.client.prediction.session.SessionIdGenerator;
-import eu.musesproject.contextmodel.PackageStatus;
 
 public class TrainingSetBuilder {
 
@@ -40,7 +30,7 @@ public class TrainingSetBuilder {
 		for (int i = 0; i <= maxSessionId; ++i) {
 			Cursor sessionData = dbManager.getAllLabeledDataForSessionId(i);
 			Instance instance = instanceBuilder.getInstance(sessionData,
-					context, allAttributesVector);
+					allAttributesVector);
 			if (instance != null) {
 				trainingSet.add(instance);
 

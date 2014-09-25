@@ -28,6 +28,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
+import eu.musesproject.client.classification.ClassificationController;
 import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.DeviceProtectionSensor;
@@ -37,6 +38,7 @@ import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.contextmonitoring.sensors.SettingsSensor;
 import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.actuators.Setting.SettingType;
+import eu.musesproject.client.prediction.session.SessionIdGenerator;
 import eu.musesproject.contextmodel.ContextEvent;
 
 /**
@@ -190,6 +192,10 @@ public class SensorController {
             
             // add contextevent to all context event table
             mAllEvents.add(contextEvent);
+            
+            double result = ClassificationController.getInstance(context).classifyDataRecord(SessionIdGenerator.getCurrentSessionId(context));
+			double blatest = result;
+			double blatest2 = blatest;
         }
     }
 }

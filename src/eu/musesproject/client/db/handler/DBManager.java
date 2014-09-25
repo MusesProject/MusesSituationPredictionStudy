@@ -258,4 +258,13 @@ public class DBManager {
 				KEY_PROPERTY_LABELING, VALUE_PROPERTY_LABELING }, null, null,
 				null, null, null);
 	}
+	
+	public Cursor getAllUsedAppNames(int sessionId){
+		final String query = String.format("SELECT %s.%s, %s.%s, %s.%s",
+				TABLE_CONTEXTEVENT_LABELING, SESSION_ID_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING, KEY_PROPERTY_LABELING,TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING)
+				+ String.format(" FROM %s, %s ", TABLE_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING)
+				+ String.format("WHERE %s.%s <= %d ;", TABLE_CONTEXTEVENT_LABELING,
+						SESSION_ID_CONTEXTEVENT_LABELING, sessionId);
+		return sqLiteDatabase.rawQuery(query, null);
+	}
 }

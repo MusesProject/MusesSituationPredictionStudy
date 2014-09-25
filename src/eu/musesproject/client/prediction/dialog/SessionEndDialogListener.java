@@ -2,6 +2,7 @@ package eu.musesproject.client.prediction.dialog;
 
 import eu.musesproject.client.classification.ClassificationController;
 import eu.musesproject.client.prediction.session.SessionDataController;
+import eu.musesproject.client.prediction.session.SessionIdGenerator;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;

@@ -4,12 +4,15 @@ import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.BatteryManager;
+import android.util.Log;
+import eu.musesproject.client.contextmonitoring.SensorController;
 import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
@@ -17,25 +20,29 @@ import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.db.handler.DBManager;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
 import eu.musesproject.client.prediction.dialog.LabelDialog;
+import eu.musesproject.client.prediction.preferences.AbstractPreference;
+import eu.musesproject.client.prediction.preferences.LastSessionIdForModelPreference;
 import eu.musesproject.client.prediction.preferences.ModelCountPreference;
+import eu.musesproject.client.prediction.session.SessionDataController;
+import eu.musesproject.client.prediction.session.SessionIdGenerator;
 import eu.musesproject.contextmodel.PackageStatus;
 
 public class ClassificationController {
 
 	private static ClassificationController mInstance;
 	private Context mContext;
-	
+
 	private Classifier mClassifier;
 
-	private ArrayList<String> mAllAppNames;
+//	private ArrayList<String> mAllAppNames;
 	private ModelBuilder mModelBuilder;
 	private TrainingSetBuilder mTrainingSetBuilder;
-	
+//	private FastVector mAllAttributesVector;
 
 	public static class MODEL_DATA {
 
 		public static final String MODEL_IDENTIFIER_NB = "naive_bayes_classifier";
-		
+
 		public static final String NONE_STRING = "none";
 
 		public static final String TRUE = "true";
@@ -95,46 +102,98 @@ public class ClassificationController {
 			// check if we reached 100 new datarecords (min)
 			if (ModelCountPreference.getInstance().get(mContext) >= 2) {
 				// disable background service
-//				Intent stopIntent = new Intent(mContext,
-//						MUSESBackgroundService.class);
-//				mContext.stopService(stopIntent);
+			
+				// Intent stopIntent = new Intent(mContext,
+				// MUSESBackgroundService.class);
+				// mContext.stopService(stopIntent);
 
 				// open DB connection
 				DBManager dbManager = new DBManager(mContext);
 				dbManager.openDB();
 
-				// get all app names to create an attribute for each of them in feature vector
-				mAllAppNames = getAllUsedAppNames(dbManager);
-				
+				// get all app names to create an attribute for each of them in
+				// feature vector
+				ArrayList<String> allAppNames = getAllUsedAppNames(dbManager);
+
 				// create instance of ModelBuilder
 				mModelBuilder = new ModelBuilder();
-				
-				// get feature vector
-				FastVector allAttributesVector = mModelBuilder.createFeatureVector(mAllAppNames);
 
-				
+				// get feature vector
+				FastVector allAttributesVector = mModelBuilder
+						.createFeatureVector(allAppNames);
+
 				// create instance of TrainingSetBuilder
 				mTrainingSetBuilder = new TrainingSetBuilder();
-				
+
 				// create training set
-				Instances trainingSet = mTrainingSetBuilder.createTrainingSet(mContext, dbManager,
-						allAttributesVector, mModelBuilder.getClassIndex());
+				Instances trainingSet = mTrainingSetBuilder.createTrainingSet(
+						mContext, dbManager, allAttributesVector,
+						mModelBuilder.getClassIndex());
 
 				dbManager.closeDB();
 
 				mClassifier = mModelBuilder.trainClassifier(trainingSet);
-				
-//				Intent startIntent = new Intent(mContext,
-//						MUSESBackgroundService.class);
-//				mContext.startService(startIntent);
+
+				if(mClassifier != null){
+					// resets the model count preference (we do not need to build a model every time)
+					ModelCountPreference.getInstance().set(mContext, 0);
+				}
+				// Intent startIntent = new Intent(mContext,
+				// MUSESBackgroundService.class);
+				// mContext.startService(startIntent);
 			}
 		}
 	}
 
-	
+	public double classifyDataRecord(int sessionId) {
+		// check the preference with the last uses sessionID (indicates, that there is a model) and check if the user is in a "new session" 
+		int lastSessionId = LastSessionIdForModelPreference.getInstance().get(
+				mContext);
+		if (lastSessionId != AbstractPreference.DefaultValues.INT && lastSessionId < SessionIdGenerator.getCurrentSessionId(mContext)) {
 
-	public String classifyDataRecord(int sessionId){
-		return null;
+			
+			
+//			if (!SessionDataController.getInstance(mContext)
+//					.isDataDeleted()) {
+//				SessionDataController.getInstance(mContext)
+//						.storeSessionData();
+//			} else {
+//				return Instance.missingValue();
+//			}
+			
+			DBManager dbManager = new DBManager(mContext);
+			dbManager.openDB();
+			
+			ArrayList<String> allAppNames = getAllUsedAppNames(dbManager, lastSessionId);
+			ModelBuilder modelBuilder = new ModelBuilder();
+			
+			FastVector featureVector = modelBuilder.createFeatureVector(allAppNames);
+			
+			
+//			Cursor sessionData = dbManager
+//					.getAllLabeledDataForSessionId(sessionId);
+
+			InstanceBuilder instanceBuilder = new InstanceBuilder();
+			Instance instance = instanceBuilder.getInstance(SensorController.getInstance(mContext).getAllContextEvents(),
+					featureVector);
+
+			try {
+				if (mClassifier == null) {
+					mClassifier = ClassifierSerializer.deserializeClassifier();
+				}
+
+				if (mClassifier != null) {
+					return mClassifier.classifyInstance(instance);
+				}
+			} catch (Exception e) {
+				Log.e("Classification result:", "Could not classify instance");
+				return Instance.missingValue();
+			}
+
+			dbManager.closeDB();
+
+		}
+		return Instance.missingValue();
 	}
 
 	private ArrayList<String> getAllUsedAppNames(DBManager dbManager) {
@@ -148,8 +207,33 @@ public class ClassificationController {
 
 					String appName = allUsedApps.getString(allUsedApps
 							.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
-					if (!array.contains(appName))
+					if (!array.contains(appName)) {
 						array.add(appName);
+					}
+				}
+			} while (allUsedApps.moveToNext());
+		}
+
+		allUsedApps.close();
+
+		return array;
+	}
+
+	private ArrayList<String> getAllUsedAppNames(DBManager dbManager,
+			int sessionId) {
+		Cursor allUsedApps = dbManager.getAllUsedAppNames(sessionId);
+		ArrayList<String> array = new ArrayList<String>();
+		if (allUsedApps.moveToFirst()) {
+			do {
+				String key = allUsedApps.getString(allUsedApps
+						.getColumnIndex(DBManager.KEY_PROPERTY_LABELING));
+				if (key.equals(AppSensor.PROPERTY_KEY_APP_NAME)) {
+
+					String appName = allUsedApps.getString(allUsedApps
+							.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+					if (!array.contains(appName)) {
+						array.add(appName);
+					}
 				}
 			} while (allUsedApps.moveToNext());
 		}

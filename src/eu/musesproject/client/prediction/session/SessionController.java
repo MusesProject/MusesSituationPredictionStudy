@@ -46,7 +46,6 @@ public class SessionController extends BroadcastReceiver {
 
 		if (action.equals(ACTION_QUIT_SESSION)) {
 			mIsSessionRunning = false;
-			// TODO delete data for session
 			SessionDataController.getInstance(context).deleteSessionData();
 			UserContextMonitoringController.getInstance(context)
 					.stopContextObservation();
@@ -60,8 +59,6 @@ public class SessionController extends BroadcastReceiver {
 				// show dialog only if no session is running
 				if (!mIsSessionRunning) {
 					startSession(context);
-					// TODO test
-//					ClassificationController.getInstance(context).buildModel();
 				}
 			} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
 
@@ -79,6 +76,12 @@ public class SessionController extends BroadcastReceiver {
 						KeyguardManager keyguardManager = (KeyguardManager) context
 								.getSystemService(Activity.KEYGUARD_SERVICE);
 						if (keyguardManager.isKeyguardLocked()) {
+							
+							
+							mIsSessionRunning = false;
+							UserContextMonitoringController
+									.getInstance(context)
+									.stopContextObservation();
 							// no call and screen is locked (user turned
 							// screen off), so stop session (don't detect
 							// screen
@@ -113,10 +116,7 @@ public class SessionController extends BroadcastReceiver {
 											.storeSessionData();
 								}
 							}
-							mIsSessionRunning = false;
-							UserContextMonitoringController
-									.getInstance(context)
-									.stopContextObservation();
+							
 						} else {
 							// no call, but screen is locked by the display
 							// timeout
