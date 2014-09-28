@@ -5,7 +5,6 @@ import java.util.List;
 import android.content.Context;
 import eu.musesproject.client.contextmonitoring.SensorController;
 import eu.musesproject.client.db.DBManager;
-import eu.musesproject.client.preferences.ModelCountPreference;
 import eu.musesproject.contextmodel.ContextEvent;
 
 public class SessionDataController {

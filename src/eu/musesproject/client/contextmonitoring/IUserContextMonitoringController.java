@@ -23,9 +23,9 @@ package eu.musesproject.client.contextmonitoring;
 import java.util.List;
 import java.util.Map;
 
+import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.contextmonitoring.UISource;
 import eu.musesproject.client.model.decisiontable.Action;
-import eu.musesproject.client.model.actuators.Setting;
 
 public interface IUserContextMonitoringController {
     /**

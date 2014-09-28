@@ -10,16 +10,34 @@ import android.os.Environment;
 
 public class ClassifierSerializer {
 
-	public static final String NB_MODEL_NAME = "NBModel.model";
-	
-	private static String mSerializiationPath;
+	private static final String NB_MODEL_NAME = "NBModel.model";
 
 	public ClassifierSerializer() {
 
 	}
 
-	public static void serializeClassifier(Classifier classifier, String name) throws Exception {
+	public static void serializeClassifier(Classifier classifier, String path)
+			throws Exception {
 
+		SerializationHelper.write(path, classifier);
+
+	}
+
+	public static Classifier deserializeClassifier(String path) {
+		ObjectInputStream ois;
+		Classifier cls = null;
+		try {
+			ois = new ObjectInputStream(
+					new FileInputStream(path));
+			cls = (Classifier) ois.readObject();
+			ois.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return cls;
+	}
+
+	public static String getNaiveBayesSerializationPath() {
 		File dir = new File(Environment.getExternalStoragePublicDirectory(
 				Environment.DIRECTORY_DOWNLOADS).getPath()
 				+ File.separatorChar + "Muses");
@@ -28,25 +46,8 @@ public class ClassifierSerializer {
 			dir.mkdir();
 		}
 
-		mSerializiationPath = dir.getPath() + File.separatorChar
-				+ name;
+		return dir.getPath() + File.separatorChar + NB_MODEL_NAME;
 
-		SerializationHelper.write(mSerializiationPath, classifier);
-
-	}
-
-	public static Classifier deserializeClassifier() {
-		ObjectInputStream ois;
-		Classifier cls = null;
-		try {
-			ois = new ObjectInputStream(
-					new FileInputStream(mSerializiationPath));
-			cls = (Classifier) ois.readObject();
-			ois.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return cls;
 	}
 
 }

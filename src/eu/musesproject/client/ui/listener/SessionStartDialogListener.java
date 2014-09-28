@@ -1,11 +1,11 @@
 package eu.musesproject.client.ui.listener;
 
-import eu.musesproject.client.preferences.LabelingStatePreference;
-import eu.musesproject.client.session.SessionDataController;
-import eu.musesproject.client.ui.LabelDialog;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import eu.musesproject.client.preferences.LabelingStatePreference;
+import eu.musesproject.client.session.SessionDataController;
+import eu.musesproject.client.ui.LabelDialog;
 
 /**
  * Class to listen for button press on the dialog which is shown at the beginning of a session

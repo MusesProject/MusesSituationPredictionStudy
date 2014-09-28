@@ -38,7 +38,6 @@ import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.contextmonitoring.sensors.SettingsSensor;
 import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.actuators.Setting.SettingType;
-import eu.musesproject.client.session.SessionIdGenerator;
 import eu.musesproject.contextmodel.ContextEvent;
 
 /**

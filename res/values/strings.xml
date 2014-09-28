@@ -16,6 +16,10 @@
     <string name="label_dialog_professional_button_text">Professional</string>
     <string name="label_dialog_later_button_text">Ask me later</string>
     <string name="label_dialog_dontknow_button_text">Don\'t know</string>
+    
+    <!-- Notification -->
+    <string name="notification_title">Running classification</string>
+    <string name="notification_text">Current usage:</string>
 
 
 </resources>

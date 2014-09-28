@@ -1,6 +1,7 @@
 package eu.musesproject.client.session;
 
 import android.content.Context;
+import eu.musesproject.client.preferences.AbstractPreference.DefaultValues;
 import eu.musesproject.client.preferences.SessionIdPreference;
 
 /**
@@ -18,6 +19,9 @@ public class SessionIdGenerator {
 
 	public static int setNewSessionId(Context context) {
 		int oldSessionId = SessionIdPreference.getInstance().get(context);
+		if(oldSessionId == DefaultValues.INT){
+			oldSessionId = 0;
+		}
 		SessionIdPreference.getInstance().set(context, ++oldSessionId);
 		return oldSessionId;
 	}

@@ -20,14 +20,14 @@ package eu.musesproject.client;
  * #L%
  */
 
-import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
-import eu.musesproject.client.preferences.IsLabelingActivatedPreference;
-import eu.musesproject.client.preferences.IsModelCreatedPreference;
-import eu.musesproject.client.preferences.IsWaitingForModelBuildPreference;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
+import eu.musesproject.client.preferences.IsLabelingActivatedPreference;
+import eu.musesproject.client.preferences.IsModelCreatedPreference;
+import eu.musesproject.client.preferences.IsWaitingForModelBuildPreference;
 
 /**
  * @author christophstanik

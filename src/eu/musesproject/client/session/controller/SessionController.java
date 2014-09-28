@@ -1,5 +1,8 @@
 package eu.musesproject.client.session.controller;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import eu.musesproject.client.model.ModelController;
 import eu.musesproject.client.preferences.AbstractPreference;
 import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
@@ -9,9 +12,6 @@ import eu.musesproject.client.preferences.IsWaitingForModelBuildPreference;
 import eu.musesproject.client.preferences.ModelCountPreference;
 import eu.musesproject.client.session.ISession;
 import eu.musesproject.client.session.SessionIdGenerator;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 
 public class SessionController extends BroadcastReceiver {
 	public static final String ACTION_QUIT_SESSION = "quit_session";
@@ -107,7 +107,7 @@ public class SessionController extends BroadcastReceiver {
 	private boolean checkForModelBuild(Context context) {
 		// TODO better get count from DB
 		if (ModelCountPreference.getInstance().get(context) != AbstractPreference.DefaultValues.INT
-				&& SessionIdGenerator.getCurrentSessionId(context) > ModelCountPreference
+				&& SessionIdGenerator.getCurrentSessionId(context) >= ModelCountPreference
 						.getInstance().get(context)) {
 			if (mLabelingSessionController != null) {
 				mLabelingSessionController.quit();

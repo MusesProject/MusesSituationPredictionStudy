@@ -1,10 +1,10 @@
 package eu.musesproject.client.session;
 
-import eu.musesproject.client.session.controller.LabelingSessionController;
-import eu.musesproject.client.session.controller.SessionController;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import eu.musesproject.client.session.controller.LabelingSessionController;
+import eu.musesproject.client.session.controller.SessionController;
 
 /**
  * Service to send a broadcast to {@link LabelingSessionController} to stop current

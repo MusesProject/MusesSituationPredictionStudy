@@ -32,9 +32,9 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Switch;
-import android.widget.Toast;
 import eu.musesproject.client.MUSESBackgroundService;
 import eu.musesproject.client.R;
+import eu.musesproject.client.Resetter;
 import eu.musesproject.client.dataexport.DataExport;
 import eu.musesproject.client.preferences.AbstractPreference.DefaultValues;
 import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
@@ -92,20 +92,20 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				
-				try{
+
+				try {
 					int sessionNumber = Integer.parseInt(s.toString());
-					if(sessionNumber == 0){
+					if (sessionNumber == 0) {
 						throw new Exception();
 					}
-					ModelCountPreference.getInstance().set(getApplicationContext(),
+					ModelCountPreference.getInstance().set(
+							getApplicationContext(),
 							Integer.parseInt(s.toString()));
-				} catch (Exception e){
-					ModelCountPreference.getInstance().set(getApplicationContext(),
-							DefaultValues.INT);
+				} catch (Exception e) {
+					ModelCountPreference.getInstance().set(
+							getApplicationContext(), DefaultValues.INT);
 				}
-				
-				
+
 			}
 		});
 
@@ -148,15 +148,8 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			break;
 
 		case R.id.reset_button:
-			// TODO reset all data
+			Resetter.resetAll(getApplicationContext());
 			break;
-
-		case R.id.labeling_switch:
-			Toast.makeText(
-					getApplicationContext(),
-					getResources().getString(
-							R.string.labeling_deactivated_toast_text),
-					Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -166,12 +159,21 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
 		initLabelingSwitch();
 		initClassificationSwitch();
+		initEditText();
+	}
+
+	private void initEditText() {
+		if (ModelCountPreference.getInstance().get(getApplicationContext()) != DefaultValues.INT) {
+			mMaxSessionEditText.setText(ModelCountPreference.getInstance().get(
+					getApplicationContext())
+					+ "");
+		}
 	}
 
 	private void initClassificationSwitch() {
 		mClassificationSwitch.setOnCheckedChangeListener(null);
 		if (IsModelCreatedPreference.getInstance().get(getApplicationContext())) {
-			mClassificationSwitch.setVisibility(View.VISIBLE);
+			mClassificationSwitchContainer.setVisibility(View.VISIBLE);
 			if (IsClassificationActivatedPreference.getInstance().get(
 					getApplicationContext())) {
 				mClassificationSwitch.setChecked(true);
@@ -191,15 +193,17 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
 			mLabelingSwitch.setChecked(false);
 			mLabelingSwitch.setEnabled(false);
-			mLabelingSwitch.setOnClickListener(this);
 			// to be safe
 			IsLabelingActivatedPreference.getInstance().set(
 					getApplicationContext(), false);
-		} else if (IsLabelingActivatedPreference.getInstance().get(
+		} else {
+			mLabelingSwitch.setEnabled(true);
+		}
+
+		if (IsLabelingActivatedPreference.getInstance().get(
 				getApplicationContext())) {
 
 			mLabelingSwitch.setChecked(true);
-			mLabelingSwitch.setOnClickListener(null);
 			mLabelingSwitch.setOnCheckedChangeListener(this);
 		}
 		mLabelingSwitch.setOnCheckedChangeListener(this);
@@ -242,4 +246,5 @@ public class MainActivity extends Activity implements View.OnClickListener,
 				getApplicationContext(), isChecked);
 	}
 
+	
 }

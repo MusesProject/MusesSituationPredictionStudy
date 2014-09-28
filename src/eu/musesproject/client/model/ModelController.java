@@ -65,7 +65,7 @@ public class ModelController {
 			if (mClassifier != null) {
 				try {
 					ClassifierSerializer.serializeClassifier(mClassifier,
-							ClassifierSerializer.NB_MODEL_NAME);
+							ClassifierSerializer.getNaiveBayesSerializationPath());
 					IsWaitingForModelBuildPreference.getInstance().set(context,
 							false);
 					IsModelCreatedPreference.getInstance().set(context, true);
@@ -83,7 +83,7 @@ public class ModelController {
 	public Classifier getClassifier(Context context) {
 		if (mClassifier == null
 				&& IsModelCreatedPreference.getInstance().get(context)) {
-			mClassifier = ClassifierSerializer.deserializeClassifier();
+			mClassifier = ClassifierSerializer.deserializeClassifier(ClassifierSerializer.getNaiveBayesSerializationPath());
 		}
 		return mClassifier;
 	}

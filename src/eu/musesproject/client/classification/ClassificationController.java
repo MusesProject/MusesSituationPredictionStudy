@@ -6,6 +6,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import android.content.Context;
 import android.util.Log;
+import eu.musesproject.client.NotificationController;
 import eu.musesproject.client.builder.InstanceBuilder;
 import eu.musesproject.client.builder.TrainingSetBuilder;
 import eu.musesproject.client.contextmonitoring.SensorController;
@@ -57,20 +58,24 @@ public class ClassificationController {
 			Instance instance = instanceBuilder.getInstance(SensorController
 					.getInstance(mContext).getAllContextEvents(), mTrainingSet);
 
+			dbManager.closeDB();
+			
 			try {
 				if (mClassifier == null) {
 					mClassifier = mModelController.getClassifier(mContext);
 				}
 
 				if (mClassifier != null) {
-					return mClassifier.classifyInstance(instance);
+					double result = mClassifier.classifyInstance(instance);
+					NotificationController.getInstance(mContext).updateNotification(result +"");
+					return result;
 				}
 			} catch (Exception e) {
-				Log.e("Classification result:", "Could not classify instance");
+				Log.e("Classification result:", "Could not classify instance ");
 				return Instance.missingValue();
 			}
 
-			dbManager.closeDB();
+			
 		}
 		return Instance.missingValue();
 	}

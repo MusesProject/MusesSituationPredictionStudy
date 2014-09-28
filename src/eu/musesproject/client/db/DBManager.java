@@ -3,13 +3,13 @@ package eu.musesproject.client.db;
 import java.util.ArrayList;
 import java.util.Map;
 
-import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 
 public class DBManager {
 
@@ -88,6 +88,7 @@ public class DBManager {
 	}
 
 	public void closeDB() {
+		Log.d(TAG, "closing database..");
 		if (sqLiteDatabase != null) {
 			databaseHelper.close();
 			sqLiteDatabase = null;
@@ -278,5 +279,11 @@ public class DBManager {
 		cursor.close();
 
 		return array;
+	}
+	
+	public void dropAllTables(){
+		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTEXTEVENT_LABELING);
+		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_PROPERTY_LABELING);
+		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USERSELECTION_LABELING);
 	}
 }
