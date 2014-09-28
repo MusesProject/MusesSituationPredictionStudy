@@ -28,14 +28,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.Toast;
 import eu.musesproject.client.MUSESBackgroundService;
 import eu.musesproject.client.R;
 import eu.musesproject.client.dataexport.DataExport;
+import eu.musesproject.client.preferences.AbstractPreference.DefaultValues;
 import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
 import eu.musesproject.client.preferences.IsLabelingActivatedPreference;
 import eu.musesproject.client.preferences.IsModelCreatedPreference;
@@ -91,8 +92,20 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				ModelCountPreference.getInstance().set(getApplicationContext(),
-						Integer.parseInt(s.toString()));
+				
+				try{
+					int sessionNumber = Integer.parseInt(s.toString());
+					if(sessionNumber == 0){
+						throw new Exception();
+					}
+					ModelCountPreference.getInstance().set(getApplicationContext(),
+							Integer.parseInt(s.toString()));
+				} catch (Exception e){
+					ModelCountPreference.getInstance().set(getApplicationContext(),
+							DefaultValues.INT);
+				}
+				
+				
 			}
 		});
 
@@ -189,6 +202,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			mLabelingSwitch.setOnClickListener(null);
 			mLabelingSwitch.setOnCheckedChangeListener(this);
 		}
+		mLabelingSwitch.setOnCheckedChangeListener(this);
 	}
 
 	@Override
