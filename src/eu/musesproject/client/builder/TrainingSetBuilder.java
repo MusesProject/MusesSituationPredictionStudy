@@ -36,6 +36,8 @@ public class TrainingSetBuilder {
 			}
 			sessionData.close();
 		}
+		
+		trainingSet.compactify();
 
 		
 

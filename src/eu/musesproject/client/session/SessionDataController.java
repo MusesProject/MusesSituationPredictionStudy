@@ -73,6 +73,7 @@ public class SessionDataController {
 	public void deleteSessionData() {
 		// delete from db (ref sessionid)
 		mDBManager.openDB();
+
 		int result = mDBManager.deleteSessionData(SessionIdGenerator
 				.getCurrentSessionId(mContext));
 		// if (result != 0) {

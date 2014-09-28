@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
+import eu.musesproject.client.session.QuitService;
 import eu.musesproject.client.session.controller.SessionController;
 
 /**
@@ -41,7 +42,7 @@ public class MUSESBackgroundService extends Service {
 			.getSimpleName();
 
 	private boolean isAppInitialized;
-	
+
 	private SessionController mSessionController;
 
 	@Override
@@ -51,7 +52,7 @@ public class MUSESBackgroundService extends Service {
 
 	@Override
 	public void onCreate() {
-        isAppInitialized = false;
+		isAppInitialized = false;
 		super.onCreate();
 	}
 
@@ -62,19 +63,19 @@ public class MUSESBackgroundService extends Service {
 			Toast.makeText(this, "MUSES started", Toast.LENGTH_LONG).show();
 			isAppInitialized = true;
 
-			
-			if(mSessionController == null){
+			if (mSessionController == null) {
 				mSessionController = new SessionController();
 			}
-			
+
 			registerReceiver(mSessionController, new IntentFilter(
 					Intent.ACTION_SCREEN_ON));
 			registerReceiver(mSessionController, new IntentFilter(
 					Intent.ACTION_SCREEN_OFF));
 			registerReceiver(mSessionController, new IntentFilter(
 					Intent.ACTION_USER_PRESENT));
-			registerReceiver(mSessionController, new IntentFilter(SessionController.ACTION_QUIT_SESSION));
-			
+			registerReceiver(mSessionController, new IntentFilter(
+					SessionController.ACTION_QUIT_SESSION));
+
 		}
 
 		return Service.START_STICKY;
@@ -84,9 +85,8 @@ public class MUSESBackgroundService extends Service {
 	public void onDestroy() {
 		isAppInitialized = false;
 		unregisterReceiver(mSessionController);
-//		mSessionController = null;
-		UserContextMonitoringController.getInstance(getApplicationContext()).stopContextObservation();
-		NotificationController.getInstance(getApplicationContext()).removeNotification();
+		// mSessionController = null;
+		mSessionController.quit(this);
 		super.onDestroy();
 	}
 }

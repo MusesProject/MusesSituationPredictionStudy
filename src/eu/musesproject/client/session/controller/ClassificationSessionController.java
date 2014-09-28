@@ -32,7 +32,9 @@ implements ISession {
 	}
 
 	@Override
-	public void quit() {		
+	public void quit() {	
+		UserContextMonitoringController.getInstance(mContext)
+		.stopContextObservation();	
 	}
 
 }

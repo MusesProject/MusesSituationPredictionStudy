@@ -227,6 +227,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		if (isChecked) {
 			startService(new Intent(this, MUSESBackgroundService.class));
 		} else {
+			startService(new Intent(this, QuitService.class));
 			stopService(new Intent(this, MUSESBackgroundService.class));
 		}
 

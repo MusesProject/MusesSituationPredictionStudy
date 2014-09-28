@@ -3,6 +3,7 @@ package eu.musesproject.client.session.controller;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import eu.musesproject.client.NotificationController;
 import eu.musesproject.client.model.ModelController;
 import eu.musesproject.client.preferences.AbstractPreference;
 import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
@@ -117,5 +118,12 @@ public class SessionController extends BroadcastReceiver {
 			return true;
 		}
 		return false;
+	}
+	
+	public void quit(Context context){
+		mLabelingSessionController.quit();
+		mClassificationSessionController.quit();
+		NotificationController.getInstance(context)
+		.removeNotification();
 	}
 }
