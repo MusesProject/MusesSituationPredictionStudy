@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="15"
+        android:minSdkVersion="16"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -45,14 +45,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="eu.musesproject.client.prediction.dialog.LabelDialog"
+            android:name="eu.musesproject.client.ui.LabelDialog"
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"
             android:launchMode="singleInstance"
             android:theme="@style/LabelDialogTheme" >
         </activity>
 
-        <service android:name="eu.musesproject.MUSESBackgroundService" >
+        <service android:name="eu.musesproject.client.MUSESBackgroundService" >
         </service>
         <service android:name="eu.musesproject.client.contextmonitoring.service.aidl.MusesServiceProvider" >
             <intent-filter>
@@ -71,13 +71,13 @@
                 android:resource="@xml/accessibilityconfig" />
         </service>
 
-        <receiver android:name="eu.musesproject.BootCompletedReceiver" >
+        <receiver android:name="eu.musesproject.client.BootCompletedReceivereceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name="eu.musesproject.client.prediction.session.SessionController" />
-        <service android:name="eu.musesproject.client.prediction.session.QuitService"></service>
+        <receiver android:name="eu.musesproject.client.session.controller.SessionController"></receiver>
+        <service android:name="eu.musesproject.client.session.QuitService"></service>
             </application>
 
 </manifest>

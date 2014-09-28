@@ -38,164 +38,176 @@ import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.contextmonitoring.sensors.SettingsSensor;
 import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.actuators.Setting.SettingType;
-import eu.musesproject.client.prediction.session.SessionIdGenerator;
+import eu.musesproject.client.session.SessionIdGenerator;
 import eu.musesproject.contextmodel.ContextEvent;
 
 /**
  * @author Christoph
  * @version 28 feb 2014
- *
- * Class to control the lifecycle of all implemented sensors
+ * 
+ *          Class to control the lifecycle of all implemented sensors
  */
 public class SensorController {
-    private static final String TAG = SensorController.class.getSimpleName();
+	private static final String TAG = SensorController.class.getSimpleName();
 
-    private static SensorController sensorController = null;
-    private final ContextEventBus contextEventBus = new ContextEventBus();
+	private static SensorController sensorController = null;
+	private final ContextEventBus contextEventBus = new ContextEventBus();
 
-    private Context context;
+	private Context context;
 
-    private Map<String, ISensor> activeSensors;
+	private Map<String, ISensor> activeSensors;
 
-    private List<ContextEvent> mAllEvents;
-    
-    private SensorController(Context context) {
-        this.context = context;
-        activeSensors = new HashMap<String, ISensor>();
-        mAllEvents = new LinkedList<ContextEvent>();
-    }
+	private List<ContextEvent> mAllEvents;
 
-    public static SensorController getInstance(Context context) {
-        if (sensorController == null) {
-            sensorController = new SensorController(context);
-        }
-        return sensorController;
-    }
+	private SensorController(Context context) {
+		this.context = context;
+		activeSensors = new HashMap<String, ISensor>();
+		mAllEvents = new LinkedList<ContextEvent>();
+	}
 
-    /**
-     * Method to start and enable all sensors
-     */
-    public void startAllSensors() {
-        initSensors();
-    }
+	public static SensorController getInstance(Context context) {
+		if (sensorController == null) {
+			sensorController = new SensorController(context);
+		}
+		return sensorController;
+	}
 
-    private void initSensors() {
-        Log.d(TAG, "called: initSensors()");
-        activeSensors.put(AppSensor.TYPE, new AppSensor(context));
-        activeSensors.put(ConnectivitySensor.TYPE, new ConnectivitySensor(context));
-        activeSensors.put(SettingsSensor.TYPE, new SettingsSensor(context));
-        activeSensors.put(FileSensor.TYPE, new FileSensor());
-        activeSensors.put(PackageSensor.TYPE, new PackageSensor(context));
-        activeSensors.put(DeviceProtectionSensor.TYPE, new DeviceProtectionSensor(context));
-//        activeSensors.put(LocationSensor.TYPE, new LocationSensor(context));
-//        activeSensors.put(InteractionSensor.TYPE, new InteractionSensor());
-        for (ISensor sensor : activeSensors.values()) {
-            sensor.addContextListener(contextEventBus);
-            sensor.enable();
-        }
-    }
+	/**
+	 * Method to start and enable all sensors
+	 */
+	public void startAllSensors() {
+		initSensors();
+	}
 
-    /**
-     * stops every enabled sensor
-     */
-    public void stopAllSensors() {
-        Log.d(TAG, "called: stopAllSensors()");
-        for (ISensor sensor : activeSensors.values()) {
-            sensor.removeContextListener(null);
-            sensor.disable();
-        }
-        activeSensors.clear();
-    }
+	private void initSensors() {
+		Log.d(TAG, "called: initSensors()");
+		activeSensors.put(AppSensor.TYPE, new AppSensor(context));
+		activeSensors.put(ConnectivitySensor.TYPE, new ConnectivitySensor(
+				context));
+		activeSensors.put(SettingsSensor.TYPE, new SettingsSensor(context));
+		activeSensors.put(FileSensor.TYPE, new FileSensor());
+		activeSensors.put(PackageSensor.TYPE, new PackageSensor(context));
+		activeSensors.put(DeviceProtectionSensor.TYPE,
+				new DeviceProtectionSensor(context));
+		// activeSensors.put(LocationSensor.TYPE, new LocationSensor(context));
+		// activeSensors.put(InteractionSensor.TYPE, new InteractionSensor());
+		for (ISensor sensor : activeSensors.values()) {
+			sensor.addContextListener(contextEventBus);
+			sensor.enable();
+		}
+	}
 
-    /**
-     * Method that performs the action of the setting which contains
-     * enabling or disabling a specific sensor
-     *
-     * @param setting {@link Setting}
-     */
-    public void changeSetting(Setting setting) {
-        ISensor sensor;
-        // load sensor that is effected by the setting
-        String sensorType = setting.getValue();
-        if (activeSensors != null && activeSensors.containsKey(sensorType)) {
-            sensor = activeSensors.get(sensorType);
+	/**
+	 * stops every enabled sensor
+	 */
+	public void stopAllSensors() {
+		Log.d(TAG, "called: stopAllSensors()");
+		for (ISensor sensor : activeSensors.values()) {
+			sensor.removeContextListener(null);
+			sensor.disable();
+		}
+		activeSensors.clear();
+	}
 
-            // perform the action described in Setting.java
-            if (sensor != null) {
-                if(setting.getSettingType() == SettingType.SETTING_SENSOR_ENABLE) {
-                    sensor.enable();
-                    // add sensor to the map of enabled sensors if not already set there
-                    activeSensors.put(sensorType, sensor);
-                    Log.d(TAG, "Sensor: " + sensor.getClass().getSimpleName() + " enabled");
-                }
-                else if(setting.getSettingType() == SettingType.SETTING_SENSOR_DISABLE) {
-                    sensor.disable();
-                    // remove the sensor of the map of enabled sensors
-                    activeSensors.remove(sensorType);
-                    Log.d(TAG, "Sensor: " + sensor.getClass().getSimpleName() + " disabled");
-                }
-            }
-        }
-    }
+	/**
+	 * Method that performs the action of the setting which contains enabling or
+	 * disabling a specific sensor
+	 * 
+	 * @param setting
+	 *            {@link Setting}
+	 */
+	public void changeSetting(Setting setting) {
+		ISensor sensor;
+		// load sensor that is effected by the setting
+		String sensorType = setting.getValue();
+		if (activeSensors != null && activeSensors.containsKey(sensorType)) {
+			sensor = activeSensors.get(sensorType);
 
-    /**
-     * Method that returns the last fired events of all enabled sensors
-     * @return {@link List} of {@link ContextEvent}
-     */
-    public List<ContextEvent> getLastFiredEvents() {
-        List<ContextEvent> contextEvents = new ArrayList<ContextEvent>();
-        if (activeSensors != null) {
-            for (ISensor sensor : activeSensors.values()) {
-                ContextEvent contextEvent = sensor.getLastFiredContextEvent();
-                if(contextEvent != null) { // just add the context event if there is already one fired
-                    contextEvents.add(contextEvent);
-                }
-            }
-        }
+			// perform the action described in Setting.java
+			if (sensor != null) {
+				if (setting.getSettingType() == SettingType.SETTING_SENSOR_ENABLE) {
+					sensor.enable();
+					// add sensor to the map of enabled sensors if not already
+					// set there
+					activeSensors.put(sensorType, sensor);
+					Log.d(TAG, "Sensor: " + sensor.getClass().getSimpleName()
+							+ " enabled");
+				} else if (setting.getSettingType() == SettingType.SETTING_SENSOR_DISABLE) {
+					sensor.disable();
+					// remove the sensor of the map of enabled sensors
+					activeSensors.remove(sensorType);
+					Log.d(TAG, "Sensor: " + sensor.getClass().getSimpleName()
+							+ " disabled");
+				}
+			}
+		}
+	}
 
-        return contextEvents;
-    }
-    
-    public Map<String, ISensor> getActiveSensors() {
+	/**
+	 * Method that returns the last fired events of all enabled sensors
+	 * 
+	 * @return {@link List} of {@link ContextEvent}
+	 */
+	public List<ContextEvent> getLastFiredEvents() {
+		List<ContextEvent> contextEvents = new ArrayList<ContextEvent>();
+		if (activeSensors != null) {
+			for (ISensor sensor : activeSensors.values()) {
+				ContextEvent contextEvent = sensor.getLastFiredContextEvent();
+				if (contextEvent != null) { // just add the context event if
+											// there is already one fired
+					contextEvents.add(contextEvent);
+				}
+			}
+		}
+
+		return contextEvents;
+	}
+
+	public Map<String, ISensor> getActiveSensors() {
 		return activeSensors;
 	}
-    
-    public List<ContextEvent> getAllContextEvents(){
-    	return mAllEvents;
-    }
-    
-    public void resetAllContextEvents(){
-    	mAllEvents = new  LinkedList<ContextEvent>();
-    }
-    
-	/**
-     * Inner class that gets notified when a new {@link ContextEvent}
-     * is fired by a {@link ISensor}
-     *
-     * @author christophstanik
-     */
-    class ContextEventBus implements ContextListener {
 
-        @Override
-        public void onEvent(ContextEvent contextEvent) {
-            //Log.d(TAG, "onEvent(ContextEvent contextEvent)");
-            /*
-             * Workflow of creating an action and sending it to the server
-             *
-             * If a context event is fired:
-             * 1. check if there are already enough context events to create an user action
-             * 2. create an user action based on the current and the previous context events
-             * 3. update the lastFiredContextEvent list
-             * 4. send the action via the {@link eu.musesproject.client.contextmonitoring.UserContextMonitoringController}
-             *      to the server
-             */
-            
-            // add contextevent to all context event table
-            mAllEvents.add(contextEvent);
-            
-            double result = ClassificationController.getInstance(context).classifyDataRecord(SessionIdGenerator.getCurrentSessionId(context));
+	public List<ContextEvent> getAllContextEvents() {
+		return mAllEvents;
+	}
+
+	public void resetAllContextEvents() {
+		mAllEvents = new LinkedList<ContextEvent>();
+	}
+
+	/**
+	 * Inner class that gets notified when a new {@link ContextEvent} is fired
+	 * by a {@link ISensor}
+	 * 
+	 * @author christophstanik
+	 */
+	class ContextEventBus implements ContextListener {
+
+		boolean isRunning = false;
+
+		@Override
+		public void onEvent(ContextEvent contextEvent) {
+			// Log.d(TAG, "onEvent(ContextEvent contextEvent)");
+			/*
+			 * Workflow of creating an action and sending it to the server
+			 * 
+			 * If a context event is fired: 1. check if there are already enough
+			 * context events to create an user action 2. create an user action
+			 * based on the current and the previous context events 3. update
+			 * the lastFiredContextEvent list 4. send the action via the {@link
+			 * eu.musesproject.client.contextmonitoring.
+			 * UserContextMonitoringController} to the server
+			 */
+
+			// add contextevent to all context event table
+			mAllEvents.add(contextEvent);
+
+			double result = ClassificationController.getInstance(context)
+					.classifyDataRecord();
+
 			double blatest = result;
 			double blatest2 = blatest;
-        }
-    }
+
+		}
+	}
 }

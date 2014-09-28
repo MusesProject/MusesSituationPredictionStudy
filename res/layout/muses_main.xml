@@ -2,8 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:layout_margin="8dp" >
+  
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Labeling" />
+            android:text="@string/labeling_title" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -31,34 +32,70 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
-
-   <!--   <LinearLayout
+    
+     <LinearLayout
+         android:id="@+id/classification_switch_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone" >
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Export Data" />
+            android:text="@string/classification_title" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center" > -->
+            android:gravity="center" >
 
-            <Button
-                android:layout_marginTop="8dp"
-                android:id="@+id/export_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Export Data" />
-        <!--  </LinearLayout>
-    </LinearLayout> -->
+            <Switch
+                android:id="@+id/classification_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal" >
+        
+        <TextView android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/session_number_title"/>
+
+        <EditText
+            android:id="@+id/session_count_editText"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:inputType="number" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/export_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/export_title" />
+    
+    <Button
+        android:id="@+id/reset_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/reset_title" />
+    
 
 </LinearLayout>

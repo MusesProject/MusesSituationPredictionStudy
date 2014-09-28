@@ -3,7 +3,11 @@
     <string name="app_name">_MUSES</string>
 
     <string name="labeling_title">Labeling</string>
-    <string name="export_title">Export Data</string>
+    <string name="classification_title">Classification</string>
+    <string name="export_title">Export data</string>
+    <string name="reset_title">Reset model</string>
+    <string name="session_number_title">Number of labeled sessions before model is built</string>
+    <string name="labeling_deactivated_toast_text">A model was built and is used to classify your smartphone usage. Please reset the model to be able to label data again and build a new model.</string>
 
     <!-- Label Dialogs -->
     <string name="session_start_label_dialog_text">How will you use your Smartphone?</string>
