@@ -25,7 +25,7 @@ public class ClassificationController {
 
 	private ClassificationController(Context context) {
 		mContext = context;
-		mModelController = new ModelController();
+		mModelController = ModelController.getInstance();
 		mTrainingSetBuilder = new TrainingSetBuilder();
 
 	}

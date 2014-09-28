@@ -60,6 +60,10 @@ public class SessionController extends BroadcastReceiver {
 			// if there are enough data for a model, we will build it here if
 			// possible
 			if (IsWaitingForModelBuildPreference.getInstance().get(context)) {
+				
+				if (mModelController == null) {
+					mModelController = ModelController.getInstance();
+				}
 				mModelController.buildModel(context);
 			}
 
@@ -100,9 +104,7 @@ public class SessionController extends BroadcastReceiver {
 			mLabelingSessionController = new LabelingSessionController(context);
 		}
 
-		if (mModelController == null) {
-			mModelController = new ModelController();
-		}
+
 	}
 
 	private boolean checkForModelBuild(Context context) {

@@ -30,10 +30,18 @@ public class ModelController {
 	private Classifier mClassifier;
 
 	private FastVector mFeatureVector;
+	private static ModelController mInstance;
 
-	public ModelController() {
+	private ModelController() {
 		mFeatureVectorBuilder = new FeatureVectorBuilder();
 		mTrainingSetBuilder = new TrainingSetBuilder();
+	}
+
+	public static ModelController getInstance() {
+		if (mInstance == null) {
+			mInstance = new ModelController();
+		}
+		return mInstance;
 	}
 
 	public void buildModel(Context context) {
@@ -65,12 +73,14 @@ public class ModelController {
 			if (mClassifier != null) {
 				try {
 					ClassifierSerializer.serializeClassifier(mClassifier,
-							ClassifierSerializer.getNaiveBayesSerializationPath());
+							ClassifierSerializer
+									.getNaiveBayesSerializationPath());
 					IsWaitingForModelBuildPreference.getInstance().set(context,
 							false);
 					IsModelCreatedPreference.getInstance().set(context, true);
-					
-					IsClassificationActivatedPreference.getInstance().set(context, true);
+
+					IsClassificationActivatedPreference.getInstance().set(
+							context, true);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -83,7 +93,9 @@ public class ModelController {
 	public Classifier getClassifier(Context context) {
 		if (mClassifier == null
 				&& IsModelCreatedPreference.getInstance().get(context)) {
-			mClassifier = ClassifierSerializer.deserializeClassifier(ClassifierSerializer.getNaiveBayesSerializationPath());
+			mClassifier = ClassifierSerializer
+					.deserializeClassifier(ClassifierSerializer
+							.getNaiveBayesSerializationPath());
 		}
 		return mClassifier;
 	}
