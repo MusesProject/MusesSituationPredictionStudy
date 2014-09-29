@@ -201,11 +201,7 @@ public class SensorController {
 			// add contextevent to all context event table
 			mAllEvents.add(contextEvent);
 
-			double result = ClassificationController.getInstance(context)
-					.classifyDataRecord();
-
-			double blatest = result;
-			double blatest2 = blatest;
+			ClassificationController.getInstance(context).classifyDataRecord();
 
 		}
 	}

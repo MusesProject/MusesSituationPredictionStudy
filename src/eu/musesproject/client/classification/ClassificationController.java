@@ -59,7 +59,7 @@ public class ClassificationController {
 					.getInstance(mContext).getAllContextEvents(), mTrainingSet);
 
 			dbManager.closeDB();
-			
+
 			try {
 				if (mClassifier == null) {
 					mClassifier = mModelController.getClassifier(mContext);
@@ -67,7 +67,10 @@ public class ClassificationController {
 
 				if (mClassifier != null) {
 					double result = mClassifier.classifyInstance(instance);
-					NotificationController.getInstance(mContext).updateNotification(result +"");
+					NotificationController.getInstance(mContext)
+							.updateNotification(
+									instance.classAttribute().value(
+											(int) result));
 					return result;
 				}
 			} catch (Exception e) {
@@ -75,7 +78,6 @@ public class ClassificationController {
 				return Instance.missingValue();
 			}
 
-			
 		}
 		return Instance.missingValue();
 	}

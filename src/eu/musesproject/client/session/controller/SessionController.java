@@ -60,7 +60,7 @@ public class SessionController extends BroadcastReceiver {
 			// if there are enough data for a model, we will build it here if
 			// possible
 			if (IsWaitingForModelBuildPreference.getInstance().get(context)) {
-				
+
 				if (mModelController == null) {
 					mModelController = ModelController.getInstance();
 				}
@@ -104,7 +104,6 @@ public class SessionController extends BroadcastReceiver {
 			mLabelingSessionController = new LabelingSessionController(context);
 		}
 
-
 	}
 
 	private boolean checkForModelBuild(Context context) {
@@ -121,11 +120,15 @@ public class SessionController extends BroadcastReceiver {
 		}
 		return false;
 	}
-	
-	public void quit(Context context){
-		mLabelingSessionController.quit();
-		mClassificationSessionController.quit();
-		NotificationController.getInstance(context)
-		.removeNotification();
+
+	public void quit(Context context) {
+		if (mLabelingSessionController != null) {
+			mLabelingSessionController.quit();
+		}
+		if (mClassificationSessionController != null) {
+			mClassificationSessionController.quit();
+		}
+		
+		NotificationController.getInstance(context).removeNotification();
 	}
 }
