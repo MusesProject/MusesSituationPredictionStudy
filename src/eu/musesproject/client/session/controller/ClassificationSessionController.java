@@ -20,42 +20,38 @@ package eu.musesproject.client.session.controller;
  * #L%
  */
 
-
 import android.content.Context;
 import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
 import eu.musesproject.client.session.ISession;
 
-public class ClassificationSessionController 
-//extends BroadcastReceiver 
-implements ISession {
+public class ClassificationSessionController implements ISession {
 
-	
 	private Context mContext;
 
-	public ClassificationSessionController(Context context){
+	public ClassificationSessionController(Context context) {
 		mContext = context;
 	}
 
 	@Override
-	public void userPresent() {		
+	public void userPresent() {
 	}
 
 	@Override
 	public void screenOn() {
 		UserContextMonitoringController.getInstance(mContext)
-		.startContextObservation();		
+				.startContextObservation();
 	}
 
 	@Override
 	public void screenOff() {
 		UserContextMonitoringController.getInstance(mContext)
-		.stopContextObservation();		
+				.stopContextObservation();
 	}
 
 	@Override
-	public void quit() {	
+	public void quit() {
 		UserContextMonitoringController.getInstance(mContext)
-		.stopContextObservation();	
+				.stopContextObservation();
 	}
 
 }

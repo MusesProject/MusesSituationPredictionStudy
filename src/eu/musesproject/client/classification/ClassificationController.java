@@ -59,6 +59,7 @@ public class ClassificationController {
 		// check the preference with the last uses sessionID (indicates, that
 		// there is a model) and check if the user is in a "new session"
 		if (IsModelCreatedPreference.getInstance().get(mContext)) {
+			
 			DBManager dbManager = new DBManager(mContext);
 			dbManager.openDB();
 
@@ -73,7 +74,7 @@ public class ClassificationController {
 			}
 
 			InstanceBuilder instanceBuilder = new InstanceBuilder(featureVector);
-			Instance instance = instanceBuilder.getInstance(SensorController
+			Instance instance = instanceBuilder.getInstanceFromList(SensorController
 					.getInstance(mContext).getAllContextEvents(), mTrainingSet);
 
 			dbManager.closeDB();

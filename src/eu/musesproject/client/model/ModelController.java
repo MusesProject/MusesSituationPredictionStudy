@@ -33,7 +33,6 @@ import eu.musesproject.client.builder.TrainingSetBuilder;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor;
-import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor.FileSensor;
 import eu.musesproject.client.db.DBManager;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
 import eu.musesproject.client.preferences.IsClassificationActivatedPreference;

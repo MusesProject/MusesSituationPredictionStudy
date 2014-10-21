@@ -48,7 +48,7 @@ public class TrainingSetBuilder {
 
 		for (int i = 0; i <= maxSessionId; ++i) {
 			Cursor sessionData = dbManager.getAllLabeledDataForSessionId(i);
-			Instance instance = instanceBuilder.getInstance(sessionData, trainingSet);
+			Instance instance = instanceBuilder.getInstanceFromCursor(sessionData, trainingSet);
 			if (instance != null) {
 				trainingSet.add(instance);
 			}

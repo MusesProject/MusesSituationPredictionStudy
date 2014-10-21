@@ -1,4 +1,5 @@
 package eu.musesproject.client.builder;
+
 /*
  * #%L
  * musesclient
@@ -32,7 +33,6 @@ import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
 import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor;
-import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor.FileSensor;
 import eu.musesproject.client.db.DBManager;
 import eu.musesproject.client.model.ModelController.MODEL_DATA;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
@@ -51,7 +51,7 @@ public class InstanceBuilder {
 		setTrackingArray(mAllAttributesVector);
 	}
 
-	public Instance getInstance(Cursor sessionData, Instances trainingSet) {
+	public Instance getInstanceFromCursor(Cursor sessionData, Instances trainingSet) {
 
 		Instance instance = null;
 
@@ -62,24 +62,19 @@ public class InstanceBuilder {
 				// every record has the users selection, we take it here
 				// from the first record
 				// if (!isInstanceToClassify) {
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME),
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME),
 						getUserSelection(sessionData));
 
 				// }
 
-				setInsertedStatus(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME,
-						true);
+				setInsertedStatus(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME, true);
 				do {
-					String type = sessionData
-							.getString(sessionData
-									.getColumnIndex(DBManager.TYPE_CONTEXTEVENT_LABELING));
+					String type = sessionData.getString(sessionData
+							.getColumnIndex(DBManager.TYPE_CONTEXTEVENT_LABELING));
 
-					String key = sessionData.getString(sessionData
-							.getColumnIndex(DBManager.KEY_PROPERTY_LABELING));
+					String key = sessionData.getString(sessionData.getColumnIndex(DBManager.KEY_PROPERTY_LABELING));
 
-					setValueToInstance(type, key, instance, sessionData,
-							mAllAttributesVector);
+					setValueToInstance(type, key, instance, sessionData, mAllAttributesVector);
 
 				} while (sessionData.moveToNext());
 				fillEmptyValues(instance, mAllAttributesVector);
@@ -88,8 +83,7 @@ public class InstanceBuilder {
 		return instance;
 	}
 
-	public Instance getInstance(List<ContextEvent> sensorContextEvents,
-			Instances trainingSet) {
+	public Instance getInstanceFromList(List<ContextEvent> sensorContextEvents, Instances trainingSet) {
 
 		Instance instance = new Instance(mAllAttributesVector.size());
 		instance.setDataset(trainingSet);
@@ -106,8 +100,7 @@ public class InstanceBuilder {
 	private String getFileEventValue(String value) {
 		// String value = cursor.getString(cursor
 		// .getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
-		if (value.equals(RecursiveFileSensor.MOVE_SELF)
-				|| value.equals(RecursiveFileSensor.MOVED_FROM)
+		if (value.equals(RecursiveFileSensor.MOVE_SELF) || value.equals(RecursiveFileSensor.MOVED_FROM)
 				|| value.equals(RecursiveFileSensor.MOVED_TO)) {
 			return MODEL_DATA.FILESENSOR_MOVED;
 		} else if (value.equals(RecursiveFileSensor.CREATE)) {
@@ -200,39 +193,28 @@ public class InstanceBuilder {
 	// }
 
 	private String getUserSelection(Cursor allDataCursor) {
-		return allDataCursor.getString(allDataCursor
-				.getColumnIndex(DBManager.VALUE_USERSELECTION_LABELING));
+		return allDataCursor.getString(allDataCursor.getColumnIndex(DBManager.VALUE_USERSELECTION_LABELING));
 	}
 
-	private void fillEmptyValues(Instance instance,
-			FastVector mAllAttributesVector) {
+	private void fillEmptyValues(Instance instance, FastVector mAllAttributesVector) {
 		for (TrackingObject to : mTrackingArray) {
 			if (!to.mInserted) {
-				if (to.mAttributeName
-						.equals(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)
-						|| to.mAttributeName
-								.equals(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
+				if (to.mAttributeName.equals(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)
+						|| to.mAttributeName.equals(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
 
 					// no true/false value
-					instance.setValue(getIndexOfAttribute(to.mAttributeName),
-							MODEL_DATA.NONE_STRING);
-				} else if (to.mAttributeName
-						.equals(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS)) {
+					instance.setValue(getIndexOfAttribute(to.mAttributeName), MODEL_DATA.NONE_STRING);
+				} else if (to.mAttributeName.equals(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS)) {
 					instance.setValue(getIndexOfAttribute(to.mAttributeName), 0);
-				} else if (to.mAttributeName
-						.equals(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED)) {
-					instance.setValue(getIndexOfAttribute(to.mAttributeName),
-							MODEL_DATA.BLUETOOTH_FALSE);
-				} else if (to.mAttributeName
-						.equals(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME))
+				} else if (to.mAttributeName.equals(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED)) {
+					instance.setValue(getIndexOfAttribute(to.mAttributeName), MODEL_DATA.BLUETOOTH_FALSE);
+				} else if (to.mAttributeName.equals(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME))
 
 				{
 				} else {
 
 					try {
-						instance.setValue(
-								getIndexOfAttribute(to.mAttributeName),
-								MODEL_DATA.FALSE);
+						instance.setValue(getIndexOfAttribute(to.mAttributeName), MODEL_DATA.FALSE);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -242,17 +224,14 @@ public class InstanceBuilder {
 		}
 	}
 
-	private void setValueToInstance(ContextEvent ce, Instance instance,
-			FastVector mAllAttributesVector) {
+	private void setValueToInstance(ContextEvent ce, Instance instance, FastVector mAllAttributesVector) {
 		Map<String, String> ceProperties = ce.getProperties();
 
 		if (ce.getType().equals(RecursiveFileSensor.TYPE)) {
 			if (ceProperties.containsKey(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)) {
-				String value = getFileEventValue(ceProperties
-						.get(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT));
+				String value = getFileEventValue(ceProperties.get(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT));
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.FILESENSOR_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.FILESENSOR_ATTRIBUTE_NAME, value);
 
 				// instance.setValue(
 				// (Attribute) mAllAttributesVector
@@ -263,139 +242,98 @@ public class InstanceBuilder {
 				// true);
 			}
 		} else if (ce.getType().equals(ConnectivitySensor.TYPE)) {
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED)) {
-				String value = ceProperties
-						.get(ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED);
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED)) {
+				String value = ceProperties.get(ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED);
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.MOBILE_CONNECTED_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.MOBILE_CONNECTED_ATTRIBUTE_NAME, value);
 			}
 
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED)) {
-				String value = ceProperties
-						.get(ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED);
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED)) {
+				String value = ceProperties.get(ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED);
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.WIFI_ENABLED_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.WIFI_ENABLED_ATTRIBUTE_NAME, value);
 			}
 
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED)) {
-				String value = ceProperties
-						.get(ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED);
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED)) {
+				String value = ceProperties.get(ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED);
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.WIFI_CONNECTED_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.WIFI_CONNECTED_ATTRIBUTE_NAME, value);
 			}
 
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS)) {
-				int value = getWifiNeighborsValue(ceProperties
-						.get(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS));
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS)) {
+				int value = getWifiNeighborsValue(ceProperties.get(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS));
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.WIFI_NEIGHBORS_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.WIFI_NEIGHBORS_ATTRIBUTE_NAME, value);
 			}
 
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID)) {
-				String value = ceProperties
-						.get(ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID);
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID)) {
+				String value = ceProperties.get(ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID);
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.HIDDEN_SSID_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.HIDDEN_SSID_ATTRIBUTE_NAME, value);
 			}
 
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED)) {
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED)) {
 				String value = getBluetoothConnectedValue(ceProperties
 						.get(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED));
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.BLUETOOTH_CONNECTED_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.BLUETOOTH_CONNECTED_ATTRIBUTE_NAME, value);
 			}
 
-			if (ceProperties
-					.containsKey(ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE)) {
-				String value = ceProperties
-						.get(ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE);
+			if (ceProperties.containsKey(ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE)) {
+				String value = ceProperties.get(ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE);
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.AIRPLANE_MODE_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.AIRPLANE_MODE_ATTRIBUTE_NAME, value);
 			}
 		} else if (ce.getType().equals(PackageSensor.TYPE)) {
-			if (ceProperties
-					.containsKey(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
-				String value = getPackageStatusValue(ceProperties
-						.get(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS));
+			if (ceProperties.containsKey(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
+				String value = getPackageStatusValue(ceProperties.get(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS));
 
-				insertValue(instance, mAllAttributesVector,
-						MODEL_DATA.PACKAGE_STATUS_ATTRIBUTE_NAME, value);
+				insertValue(instance, mAllAttributesVector, MODEL_DATA.PACKAGE_STATUS_ATTRIBUTE_NAME, value);
 			}
 		} else if (ce.getType().equals(AppSensor.TYPE)) {
 			if (ceProperties.containsKey(AppSensor.PROPERTY_KEY_APP_NAME)) {
-				String appName = ceProperties
-						.get(AppSensor.PROPERTY_KEY_APP_NAME);
+				String appName = ceProperties.get(AppSensor.PROPERTY_KEY_APP_NAME);
 				if (getIndexOfAttribute(appName) != -1) {
-					insertValue(instance, mAllAttributesVector, appName,
-							MODEL_DATA.TRUE);
+					insertValue(instance, mAllAttributesVector, appName, MODEL_DATA.TRUE);
 				}
 			}
 		}
 	}
 
-	private void setValueToInstance(String type, String key, Instance instance,
-			Cursor cursor, FastVector mAllAttributesVector) {
+	private void setValueToInstance(String type, String key, Instance instance, Cursor cursor,
+			FastVector mAllAttributesVector) {
 		if (type != null && key != null) {
-			if (type.equals(RecursiveFileSensor.TYPE)
-					&& key.equals(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)) {
+			if (type.equals(RecursiveFileSensor.TYPE) && key.equals(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)) {
 
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.FILESENSOR_ATTRIBUTE_NAME),
-						getFileEventValue(value));
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.FILESENSOR_ATTRIBUTE_NAME), getFileEventValue(value));
 
 				setInsertedStatus(MODEL_DATA.FILESENSOR_ATTRIBUTE_NAME, true);
 
 			} else if (type.equals(ConnectivitySensor.TYPE)
 					&& key.equals(ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED)) {
 
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.MOBILE_CONNECTED_ATTRIBUTE_NAME),
-						value);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.MOBILE_CONNECTED_ATTRIBUTE_NAME), value);
 
-				setInsertedStatus(MODEL_DATA.MOBILE_CONNECTED_ATTRIBUTE_NAME,
-						true);
-			} else if (type.equals(ConnectivitySensor.TYPE)
-					&& key.equals(ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED)) {
+				setInsertedStatus(MODEL_DATA.MOBILE_CONNECTED_ATTRIBUTE_NAME, true);
+			} else if (type.equals(ConnectivitySensor.TYPE) && key.equals(ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED)) {
 
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.WIFI_ENABLED_ATTRIBUTE_NAME),
-						value);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.WIFI_ENABLED_ATTRIBUTE_NAME), value);
 
 				setInsertedStatus(MODEL_DATA.WIFI_ENABLED_ATTRIBUTE_NAME, true);
 
 			} else if (type.equals(ConnectivitySensor.TYPE)
 					&& key.equals(ConnectivitySensor.PROPERTY_KEY_WIFI_CONNECTED)) {
 
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.WIFI_CONNECTED_ATTRIBUTE_NAME),
-						value);
-				setInsertedStatus(MODEL_DATA.WIFI_CONNECTED_ATTRIBUTE_NAME,
-						true);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.WIFI_CONNECTED_ATTRIBUTE_NAME), value);
+				setInsertedStatus(MODEL_DATA.WIFI_CONNECTED_ATTRIBUTE_NAME, true);
 
 			} else if (type.equals(ConnectivitySensor.TYPE)
 					&& key.equals(ConnectivitySensor.PROPERTY_KEY_WIFI_NEIGHBORS)) {
@@ -403,66 +341,46 @@ public class InstanceBuilder {
 				int value = getWifiNeighborsValue(cursor.getString(cursor
 						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING)));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.WIFI_NEIGHBORS_ATTRIBUTE_NAME),
-						value);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.WIFI_NEIGHBORS_ATTRIBUTE_NAME), value);
 
-				setInsertedStatus(MODEL_DATA.WIFI_NEIGHBORS_ATTRIBUTE_NAME,
-						true);
+				setInsertedStatus(MODEL_DATA.WIFI_NEIGHBORS_ATTRIBUTE_NAME, true);
 
-			} else if (type.equals(ConnectivitySensor.TYPE)
-					&& key.equals(ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID)) {
+			} else if (type.equals(ConnectivitySensor.TYPE) && key.equals(ConnectivitySensor.PROPERTY_KEY_HIDDEN_SSID)) {
 
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.HIDDEN_SSID_ATTRIBUTE_NAME),
-						value);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.HIDDEN_SSID_ATTRIBUTE_NAME), value);
 				setInsertedStatus(MODEL_DATA.HIDDEN_SSID_ATTRIBUTE_NAME, true);
 
 			} else if (type.equals(ConnectivitySensor.TYPE)
 					&& key.equals(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED)) {
 
-				String value = getBluetoothConnectedValue(cursor
-						.getString(cursor
-								.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING)));
+				String value = getBluetoothConnectedValue(cursor.getString(cursor
+						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING)));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.BLUETOOTH_CONNECTED_ATTRIBUTE_NAME),
-						value);
-				setInsertedStatus(
-						MODEL_DATA.BLUETOOTH_CONNECTED_ATTRIBUTE_NAME, true);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.BLUETOOTH_CONNECTED_ATTRIBUTE_NAME), value);
+				setInsertedStatus(MODEL_DATA.BLUETOOTH_CONNECTED_ATTRIBUTE_NAME, true);
 
 			} else if (type.equals(ConnectivitySensor.TYPE)
 					&& key.equals(ConnectivitySensor.PROPERTY_KEY_AIRPLANE_MODE)) {
 
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.AIRPLANE_MODE_ATTRIBUTE_NAME),
-						value);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.AIRPLANE_MODE_ATTRIBUTE_NAME), value);
 
 				setInsertedStatus(MODEL_DATA.AIRPLANE_MODE_ATTRIBUTE_NAME, true);
 
-			} else if (type.equals(PackageSensor.TYPE)
-					&& key.equals(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
+			} else if (type.equals(PackageSensor.TYPE) && key.equals(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
 
 				String value = getPackageStatusValue(cursor.getString(cursor
 						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING)));
 
-				instance.setValue(
-						getIndexOfAttribute(MODEL_DATA.PACKAGE_STATUS_ATTRIBUTE_NAME),
-						value);
+				instance.setValue(getIndexOfAttribute(MODEL_DATA.PACKAGE_STATUS_ATTRIBUTE_NAME), value);
 
-				setInsertedStatus(MODEL_DATA.PACKAGE_STATUS_ATTRIBUTE_NAME,
-						true);
+				setInsertedStatus(MODEL_DATA.PACKAGE_STATUS_ATTRIBUTE_NAME, true);
 
-			} else if (type.equals(AppSensor.TYPE)
-					&& key.equals(AppSensor.PROPERTY_KEY_APP_NAME)) {
-				String value = cursor.getString(cursor
-						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
+			} else if (type.equals(AppSensor.TYPE) && key.equals(AppSensor.PROPERTY_KEY_APP_NAME)) {
+				String value = cursor.getString(cursor.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
 
 				// special: value (appname) is attribute name
 				instance.setValue(getIndexOfAttribute(value), MODEL_DATA.TRUE);
@@ -472,16 +390,14 @@ public class InstanceBuilder {
 		}
 	}
 
-	private void insertValue(Instance instance,
-			FastVector mAllAttributesVector, String key, String value) {
+	private void insertValue(Instance instance, FastVector mAllAttributesVector, String key, String value) {
 		int index = getIndexOfAttribute(key);
 		Log.e("INDEX IN TRACKING ARRAY: " + key, index + "");
 		instance.setValue(index, value);
 		setInsertedStatus(key, true);
 	}
 
-	private void insertValue(Instance instance,
-			FastVector mAllAttributesVector, String key, int value) {
+	private void insertValue(Instance instance, FastVector mAllAttributesVector, String key, int value) {
 		instance.setValue(getIndexOfAttribute(key), value);
 
 		setInsertedStatus(key, true);
@@ -493,8 +409,7 @@ public class InstanceBuilder {
 			TrackingObject trackingObject = new TrackingObject();
 			// trackingObject.mAttribute = (Attribute) mAllAttributesVector
 			// .elementAt(i);
-			trackingObject.mAttributeName = ((Attribute) mAllAttributesVector
-					.elementAt(i)).name();
+			trackingObject.mAttributeName = ((Attribute) mAllAttributesVector.elementAt(i)).name();
 			trackingObject.mInserted = false;
 			mTrackingArray.add(trackingObject);
 		}

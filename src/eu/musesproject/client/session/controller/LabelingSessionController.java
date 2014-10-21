@@ -20,7 +20,6 @@ package eu.musesproject.client.session.controller;
  * #L%
  */
 
-
 import java.util.Calendar;
 
 import android.annotation.SuppressLint;
@@ -47,9 +46,7 @@ import eu.musesproject.client.ui.LabelDialog;
  * @author D
  * 
  */
-public class LabelingSessionController
-// extends BroadcastReceiver
-		implements ISession {
+public class LabelingSessionController implements ISession {
 
 	private boolean mIsSessionRunning = false;
 	private Context mContext;
@@ -194,7 +191,7 @@ public class LabelingSessionController
 			SessionDataController.getInstance(mContext).deleteSessionData();
 		}
 		mIsSessionRunning = false;
-		
+
 		UserContextMonitoringController.getInstance(mContext)
 				.stopContextObservation();
 
