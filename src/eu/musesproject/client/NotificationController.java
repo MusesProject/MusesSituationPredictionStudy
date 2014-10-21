@@ -1,4 +1,24 @@
 package eu.musesproject.client;
+/*
+ * #%L
+ * musesclient
+ * %%
+ * Copyright (C) 2013 - 2014 HITEC
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 
 import android.app.Notification;
 import android.app.Notification.Builder;
@@ -32,11 +52,10 @@ public class NotificationController {
 	public void updateNotification(String newValue) {
 		if (mBuilder == null) {
 			mBuilder = new Notification.Builder(mContext);
-			mBuilder.setSmallIcon(R.drawable.muses_main);
 			mBuilder.setContentTitle(mContext.getResources().getString(R.string.notification_title));
 		}
 
-		
+		mBuilder.setSmallIcon(getIconResId(newValue));
 		mBuilder.setContentText(mContext.getResources().getString(R.string.notification_text) + " " +newValue);
 
 		// Creates an explicit intent for an Activity in your app
@@ -71,5 +90,16 @@ public class NotificationController {
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 		}
 		mNotificationManager.cancel(NOTIFICATION_ID);
+	}
+	
+	private int getIconResId(String result){
+		if(result.equals("private"))
+		{
+			return R.drawable.ic_stat_priv;
+		} else if(result.equals("professional")){
+			return R.drawable.ic_stat_prof;
+		}
+		
+		return -1;
 	}
 }

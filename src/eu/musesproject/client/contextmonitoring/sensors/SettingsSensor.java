@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 
 /**
@@ -98,18 +100,28 @@ public class SettingsSensor implements ISensor {
     	}
     }
     
-    private String getOSVersion() {
+    public String getOSVersion() {
     	return android.os.Build.VERSION.RELEASE;
     }
     
-    private String getSDKVersion() {
+    public String getSDKVersion() {
     	return String.valueOf(android.os.Build.VERSION.SDK_INT);
     }
     
-    private String getIMEI() {
+    public String getIMEI() {
+    	String imei = null; 
+    	
     	final TelephonyManager telephonyManager = (TelephonyManager) context
     			.getSystemService(Context.TELEPHONY_SERVICE);
-    	return telephonyManager.getDeviceId();
+    	
+		if (telephonyManager != null) {
+			imei =telephonyManager.getDeviceId();
+			
+		}
+		if (imei == null || imei.length() == 0)
+			imei = Secure.getString(context.getContentResolver(),
+					Secure.ANDROID_ID);
+		return imei;
     }
 
     @Override
@@ -131,4 +143,10 @@ public class SettingsSensor implements ISensor {
             return null;
         }
     }
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		// TODO Auto-generated method stub
+		
+	}
 }

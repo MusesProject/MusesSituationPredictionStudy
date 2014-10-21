@@ -39,6 +39,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
 import eu.musesproject.contextmodel.ContextEvent;
 
@@ -60,15 +61,15 @@ public class ConnectivitySensor implements ISensor {
 
     // context property keys
     public static final String PROPERTY_KEY_ID 				  	= "id";
-    public static final String PROPERTY_KEY_MOBILE_CONNECTED   	= "mobileconnected"; // ok
-    public static final String PROPERTY_KEY_WIFI_ENABLED 	  	= "wifienabled"; // ok
-    public static final String PROPERTY_KEY_WIFI_CONNECTED 	  	= "wificonnected"; // ok
-    public static final String PROPERTY_KEY_WIFI_NEIGHBORS 	  	= "wifineighbors"; // ok
-    public static final String PROPERTY_KEY_HIDDEN_SSID 		= "hiddenssid"; // ok
+    public static final String PROPERTY_KEY_MOBILE_CONNECTED   	= "mobileconnected";
+    public static final String PROPERTY_KEY_WIFI_ENABLED 	  	= "wifienabled";
+    public static final String PROPERTY_KEY_WIFI_CONNECTED 	  	= "wificonnected";
+    public static final String PROPERTY_KEY_WIFI_NEIGHBORS 	  	= "wifineighbors";
+    public static final String PROPERTY_KEY_HIDDEN_SSID 		= "hiddenssid";
     public static final String PROPERTY_KEY_BSSID 			  	= "bssid";
     public static final String PROPERTY_KEY_NETWORK_ID 		  	= "networkid";
-    public static final String PROPERTY_KEY_BLUETOOTH_CONNECTED	= "bluetoothconnected"; // ok
-    public static final String PROPERTY_KEY_AIRPLANE_MODE 	  	= "airplanemode"; // ok
+    public static final String PROPERTY_KEY_BLUETOOTH_CONNECTED	= "bluetoothconnected";
+    public static final String PROPERTY_KEY_AIRPLANE_MODE 	  	= "airplanemode";
     public static final String PROPERTY_WIFI_ENCRYPTION         = "wifiencryption";
 
     // application context
@@ -258,4 +259,10 @@ public class ConnectivitySensor implements ISensor {
             return null;
         }
     }
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		// TODO Auto-generated method stub
+		
+	}
 }

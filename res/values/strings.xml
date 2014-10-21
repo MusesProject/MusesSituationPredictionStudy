@@ -18,7 +18,7 @@
     <string name="label_dialog_dontknow_button_text">Don\'t know</string>
     
     <!-- Notification -->
-    <string name="notification_title">Running classification</string>
+    <string name="notification_title">Muses - Classification enabled</string>
     <string name="notification_text">Current usage:</string>
 
 

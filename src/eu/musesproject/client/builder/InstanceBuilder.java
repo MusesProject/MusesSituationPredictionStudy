@@ -1,5 +1,23 @@
 package eu.musesproject.client.builder;
-
+/*
+ * #%L
+ * musesclient
+ * %%
+ * Copyright (C) 2013 - 2014 HITEC
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +30,9 @@ import android.database.Cursor;
 import android.util.Log;
 import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
-import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
 import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
+import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor;
+import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor.FileSensor;
 import eu.musesproject.client.db.DBManager;
 import eu.musesproject.client.model.ModelController.MODEL_DATA;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
@@ -87,17 +106,17 @@ public class InstanceBuilder {
 	private String getFileEventValue(String value) {
 		// String value = cursor.getString(cursor
 		// .getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));
-		if (value.equals(FileSensor.MOVE_SELF)
-				|| value.equals(FileSensor.MOVED_FROM)
-				|| value.equals(FileSensor.MOVED_TO)) {
+		if (value.equals(RecursiveFileSensor.MOVE_SELF)
+				|| value.equals(RecursiveFileSensor.MOVED_FROM)
+				|| value.equals(RecursiveFileSensor.MOVED_TO)) {
 			return MODEL_DATA.FILESENSOR_MOVED;
-		} else if (value.equals(FileSensor.CREATE)) {
+		} else if (value.equals(RecursiveFileSensor.CREATE)) {
 			return MODEL_DATA.FILESENSOR_CREATE;
-		} else if (value.equals(FileSensor.DELETE)) {
+		} else if (value.equals(RecursiveFileSensor.DELETE)) {
 			return MODEL_DATA.FILESENSOR_DELETE;
-		} else if (value.equals(FileSensor.MODIFY)) {
+		} else if (value.equals(RecursiveFileSensor.MODIFY)) {
 			return MODEL_DATA.FILESENSOR_MODIFY;
-		} else if (value.equals(FileSensor.OPEN)) {
+		} else if (value.equals(RecursiveFileSensor.OPEN)) {
 			return MODEL_DATA.FILESENSOR_OPEN;
 		} else {
 			return MODEL_DATA.NONE_STRING;
@@ -190,7 +209,7 @@ public class InstanceBuilder {
 		for (TrackingObject to : mTrackingArray) {
 			if (!to.mInserted) {
 				if (to.mAttributeName
-						.equals(FileSensor.PROPERTY_KEY_FILE_EVENT)
+						.equals(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)
 						|| to.mAttributeName
 								.equals(PackageSensor.PROPERTY_KEY_PACKAGE_STATUS)) {
 
@@ -227,10 +246,10 @@ public class InstanceBuilder {
 			FastVector mAllAttributesVector) {
 		Map<String, String> ceProperties = ce.getProperties();
 
-		if (ce.getType().equals(FileSensor.TYPE)) {
-			if (ceProperties.containsKey(FileSensor.PROPERTY_KEY_FILE_EVENT)) {
+		if (ce.getType().equals(RecursiveFileSensor.TYPE)) {
+			if (ceProperties.containsKey(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)) {
 				String value = getFileEventValue(ceProperties
-						.get(FileSensor.PROPERTY_KEY_FILE_EVENT));
+						.get(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT));
 
 				insertValue(instance, mAllAttributesVector,
 						MODEL_DATA.FILESENSOR_ATTRIBUTE_NAME, value);
@@ -330,8 +349,8 @@ public class InstanceBuilder {
 	private void setValueToInstance(String type, String key, Instance instance,
 			Cursor cursor, FastVector mAllAttributesVector) {
 		if (type != null && key != null) {
-			if (type.equals(FileSensor.TYPE)
-					&& key.equals(FileSensor.PROPERTY_KEY_FILE_EVENT)) {
+			if (type.equals(RecursiveFileSensor.TYPE)
+					&& key.equals(RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT)) {
 
 				String value = cursor.getString(cursor
 						.getColumnIndex(DBManager.VALUE_PROPERTY_LABELING));

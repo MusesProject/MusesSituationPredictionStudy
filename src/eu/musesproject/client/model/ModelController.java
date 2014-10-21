@@ -1,5 +1,23 @@
 package eu.musesproject.client.model;
-
+/*
+ * #%L
+ * musesclient
+ * %%
+ * Copyright (C) 2013 - 2014 HITEC
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
@@ -13,8 +31,9 @@ import android.os.BatteryManager;
 import eu.musesproject.client.builder.FeatureVectorBuilder;
 import eu.musesproject.client.builder.TrainingSetBuilder;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
-import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
 import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
+import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor;
+import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor.FileSensor;
 import eu.musesproject.client.db.DBManager;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
 import eu.musesproject.client.preferences.IsClassificationActivatedPreference;
@@ -159,12 +178,12 @@ public class ModelController {
 		public static final String TRUE = "true";
 		public static final String FALSE = "false";
 
-		public static final String FILESENSOR_ATTRIBUTE_NAME = FileSensor.PROPERTY_KEY_FILE_EVENT;
+		public static final String FILESENSOR_ATTRIBUTE_NAME = RecursiveFileSensor.PROPERTY_KEY_FILE_EVENT;
 		public static final String FILESENSOR_MOVED = "moved";
-		public static final String FILESENSOR_OPEN = FileSensor.OPEN;
-		public static final String FILESENSOR_MODIFY = FileSensor.MODIFY;
-		public static final String FILESENSOR_CREATE = FileSensor.CREATE;
-		public static final String FILESENSOR_DELETE = FileSensor.DELETE;
+		public static final String FILESENSOR_OPEN = RecursiveFileSensor.OPEN;
+		public static final String FILESENSOR_MODIFY = RecursiveFileSensor.MODIFY;
+		public static final String FILESENSOR_CREATE = RecursiveFileSensor.CREATE;
+		public static final String FILESENSOR_DELETE = RecursiveFileSensor.DELETE;
 
 		public static final String MOBILE_CONNECTED_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_MOBILE_CONNECTED;
 		public static final String WIFI_ENABLED_ATTRIBUTE_NAME = ConnectivitySensor.PROPERTY_KEY_WIFI_ENABLED;

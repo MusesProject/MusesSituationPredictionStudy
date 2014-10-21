@@ -1,4 +1,25 @@
 package eu.musesproject.client.ui;
+/*
+ * #%L
+ * musesclient
+ * %%
+ * Copyright (C) 2013 - 2014 HITEC
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -41,7 +62,7 @@ public class LabelDialog extends Activity {
 			listener = new SessionStartDialogListener(this);
 
 			builder.setTitle(R.string.session_start_label_dialog_text);
-			builder.setNeutralButton(R.string.label_dialog_later_button_text,
+			builder.setPositiveButton(R.string.label_dialog_later_button_text,
 					listener);
 
 			getWindow().clearFlags(
@@ -53,7 +74,7 @@ public class LabelDialog extends Activity {
 			listener = new SessionEndDialogListener(this);
 
 			builder.setTitle(R.string.session_end_label_dialog_text);
-			builder.setNeutralButton(
+			builder.setPositiveButton(
 					R.string.label_dialog_dontknow_button_text, listener);
 
 			getWindow()
@@ -63,9 +84,9 @@ public class LabelDialog extends Activity {
 
 		}
 
-		builder.setPositiveButton(R.string.label_dialog_private_button_text,
+		builder.setNegativeButton(R.string.label_dialog_private_button_text,
 				listener);
-		builder.setNegativeButton(
+		builder.setNeutralButton(
 				R.string.label_dialog_professional_button_text, listener);
 
 		AlertDialog dialog = builder.create();

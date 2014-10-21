@@ -26,8 +26,6 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
-import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
-import eu.musesproject.client.session.QuitService;
 import eu.musesproject.client.session.controller.SessionController;
 
 /**

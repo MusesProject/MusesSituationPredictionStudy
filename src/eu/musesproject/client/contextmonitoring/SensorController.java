@@ -32,9 +32,11 @@ import eu.musesproject.client.classification.ClassificationController;
 import eu.musesproject.client.contextmonitoring.sensors.AppSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ConnectivitySensor;
 import eu.musesproject.client.contextmonitoring.sensors.DeviceProtectionSensor;
-import eu.musesproject.client.contextmonitoring.sensors.FileSensor;
 import eu.musesproject.client.contextmonitoring.sensors.ISensor;
+import eu.musesproject.client.contextmonitoring.sensors.InteractionSensor;
 import eu.musesproject.client.contextmonitoring.sensors.PackageSensor;
+import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor;
+import eu.musesproject.client.contextmonitoring.sensors.RecursiveFileSensor.FileSensor;
 import eu.musesproject.client.contextmonitoring.sensors.SettingsSensor;
 import eu.musesproject.client.model.actuators.Setting;
 import eu.musesproject.client.model.actuators.Setting.SettingType;
@@ -84,12 +86,12 @@ public class SensorController {
 		activeSensors.put(ConnectivitySensor.TYPE, new ConnectivitySensor(
 				context));
 		activeSensors.put(SettingsSensor.TYPE, new SettingsSensor(context));
-		activeSensors.put(FileSensor.TYPE, new FileSensor());
+        activeSensors.put(RecursiveFileSensor.TYPE, new RecursiveFileSensor());
 		activeSensors.put(PackageSensor.TYPE, new PackageSensor(context));
 		activeSensors.put(DeviceProtectionSensor.TYPE,
 				new DeviceProtectionSensor(context));
 		// activeSensors.put(LocationSensor.TYPE, new LocationSensor(context));
-		// activeSensors.put(InteractionSensor.TYPE, new InteractionSensor());
+		 activeSensors.put(InteractionSensor.TYPE, new InteractionSensor());
 		for (ISensor sensor : activeSensors.values()) {
 			sensor.addContextListener(contextEventBus);
 			sensor.enable();
