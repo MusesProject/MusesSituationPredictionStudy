@@ -1,6 +1,7 @@
 package eu.musesproject.predictionclient.ui;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -17,10 +18,12 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 import eu.musesproject.client.R;
+import eu.musesproject.predictionclient.MUSESBackgroundService;
 import eu.musesproject.predictionclient.Resetter;
 import eu.musesproject.predictionclient.dataexport.DataExport;
 import eu.musesproject.predictionclient.preferences.IsModelCreatedPreference;
 import eu.musesproject.predictionclient.preferences.IsWaitingForModelBuildPreference;
+import eu.musesproject.predictionclient.session.QuitService;
 
 public class SettingsFragment extends PreferenceFragment implements OnPreferenceClickListener,
 		OnSharedPreferenceChangeListener, OnClickListener {
@@ -131,9 +134,20 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 					Toast.makeText(getActivity().getApplicationContext(), R.string.toast_labeling_enabled_text,
 							Toast.LENGTH_LONG).show();
 				}
+
+				if (sharedPreferences.getBoolean(mLabelingSwitchPreference.getKey(), false)) {
+					getActivity().startService(new Intent(getActivity(), MUSESBackgroundService.class));
+				} else {
+					getActivity().startService(new Intent(getActivity(), QuitService.class));
+					getActivity().stopService(new Intent(getActivity(), MUSESBackgroundService.class));
+				}
 			} else if (key.equals(mClassificationSwitchPreference.getKey())) {
-				int test = 1;
-				int test2 = test;
+				if (sharedPreferences.getBoolean(mClassificationSwitchPreference.getKey(), false)) {
+					getActivity().startService(new Intent(getActivity(), MUSESBackgroundService.class));
+				} else {
+					getActivity().startService(new Intent(getActivity(), QuitService.class));
+					getActivity().stopService(new Intent(getActivity(), MUSESBackgroundService.class));
+				}
 
 			} else {
 				int test = 1;
@@ -190,8 +204,13 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 			// np1.getValue() +
 					np2.getValue() + np3.getValue() + np4.getValue());
 			if (sessionCount != 0) {
+				getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+
 				PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).edit()
 						.putInt(mSessionCountPreference.getKey(), sessionCount).commit();
+
+				getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
 			}
 			mDialog.dismiss();
 			break;
