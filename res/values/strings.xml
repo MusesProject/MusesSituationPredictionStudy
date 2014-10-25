@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">_MUSES</string>
 
+    <string name="app_name">_MUSES</string>
     <string name="labeling_title">Labeling</string>
     <string name="classification_title">Classification</string>
     <string name="export_title">Export data</string>
@@ -16,10 +16,44 @@
     <string name="label_dialog_professional_button_text">Professional</string>
     <string name="label_dialog_later_button_text">Ask me later</string>
     <string name="label_dialog_dontknow_button_text">Don\'t know</string>
-    
+
     <!-- Notification -->
     <string name="notification_title">Muses - Classification enabled</string>
     <string name="notification_text">Current usage:</string>
 
+    <!-- Preferences -->
+    <string name="key_preference_screen">preference_screen</string>
+    <string name="key_labeling_switch">labeling_switch</string>
+    <string name="key_session_count_preference">session_count_preference</string>
+    <string name="key_export_data_preference">export_data_preference</string>
+    <string name="key_reset_model_preference">reset_model_preference</string>
+    <string name="key_classification_switch">classification_switch</string>
+    <string name="key_classification_category">classification_category</string>
+    <string name="key_labeling_category">labeling_category</string>
+    <string name="category_labeling_title">Labeling</string>
+    <string name="category_classification_title">Classification</string>
+    <string name="category_data_title">Data + Model</string>
+    <string name="switch_labeling_title">Labeling Smartphone Usage</string>
+    <string name="switch_labeling_summary_on">Turn off to disable labeling of your smartphone usage.</string>
+    <string name="switch_labeling_summary_off">Turn on to enable labeling of your smartphone usage.</string>
+    <string name="switch_classificiation_title">Classification</string>
+    <string name="switch_classificiation_summary_on">Turn on to enable classification of your smartphone usage.</string>
+    <string name="switch_classificiation_summary_off">Turn off to disable classification of your smartphone usage.</string>
+    <string name="preference_session_count_title">Session Count</string>
+    <string name="preference_session_count_summary">Number of labeled sessions before model is built</string>
+    <string name="preference_export_data_title">Export data</string>
+    <string name="preference_export_data_summary">Touch, to send your data via mail to muses and to save them on your sd card.</string>
+    <string name="preference_reset_model_title">Reset model</string>
+    <string name="preference_reset_model_summary">Touch, to reset the model and to restart labeling.</string>
 
+    <!-- Preference Dialogs -->
+    <string name="dialog_session_count_ok_button_text">O.K.</string>
+    <string name="dialog_session_count_cancel_button_text">Cancel</string>
+    <string name="dialog_session_count_title">Session Count</string>
+    <string name="dialog_session_count_text">Please set the number of sessions you want to label before the model is built.</string>
+
+    <!-- Toasts -->
+	<string name="toast_labeling_enabled_text">Please enter session count</string>
+	<string name="toast_reset_model_text">Model is reset. Please restart app.</string>
+	<string name="toast_export_data_text">Data is exported. Please wait ...</string>
 </resources>
