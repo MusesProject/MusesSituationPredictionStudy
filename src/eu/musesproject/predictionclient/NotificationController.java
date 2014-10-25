@@ -1,4 +1,5 @@
 package eu.musesproject.predictionclient;
+
 /*
  * #%L
  * musesclient
@@ -18,7 +19,6 @@ package eu.musesproject.predictionclient;
  * limitations under the License.
  * #L%
  */
-
 
 import android.app.Notification;
 import android.app.Notification.Builder;
@@ -54,10 +54,21 @@ public class NotificationController {
 		if (mBuilder == null) {
 			mBuilder = new Notification.Builder(mContext);
 			mBuilder.setContentTitle(mContext.getResources().getString(R.string.notification_title));
+			
+			Intent intent = new Intent(mContext, CorrectionReceiver.class);
+			PendingIntent privIntent = PendingIntent.getBroadcast(mContext, 0, intent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent profIntent = PendingIntent.getBroadcast(mContext, 1, intent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+
+			mBuilder.addAction(R.drawable.ic_stat_action_correction,
+					mContext.getResources().getString(R.string.label_dialog_private_button_text), privIntent);
+			mBuilder.addAction(R.drawable.ic_stat_action_correction,
+					mContext.getResources().getString(R.string.label_dialog_professional_button_text), profIntent);
 		}
 
 		mBuilder.setSmallIcon(getIconResId(newValue));
-		mBuilder.setContentText(mContext.getResources().getString(R.string.notification_text) + " " +newValue);
+		mBuilder.setContentText(mContext.getResources().getString(R.string.notification_text) + " " + newValue);
 
 		// Creates an explicit intent for an Activity in your app
 		Intent resultIntent = new Intent(mContext, MainActivity.class);
@@ -72,14 +83,12 @@ public class NotificationController {
 		stackBuilder.addParentStack(MainActivity.class);
 		// Adds the Intent that starts the Activity to the top of the stack
 		stackBuilder.addNextIntent(resultIntent);
-		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
-				PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(resultPendingIntent);
 
 		mBuilder.setOngoing(true);
 		if (mNotificationManager == null) {
-			mNotificationManager = (NotificationManager) mContext
-					.getSystemService(Context.NOTIFICATION_SERVICE);
+			mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		}
 		// mId allows you to update the notification later on.
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
@@ -87,20 +96,18 @@ public class NotificationController {
 
 	public void removeNotification() {
 		if (mNotificationManager == null) {
-			mNotificationManager = (NotificationManager) mContext
-					.getSystemService(Context.NOTIFICATION_SERVICE);
+			mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		}
 		mNotificationManager.cancel(NOTIFICATION_ID);
 	}
-	
-	private int getIconResId(String result){
-		if(result.equals("private"))
-		{
+
+	private int getIconResId(String result) {
+		if (result.equals("private")) {
 			return R.drawable.ic_stat_priv;
-		} else if(result.equals("professional")){
+		} else if (result.equals("professional")) {
 			return R.drawable.ic_stat_prof;
 		}
-		
+
 		return -1;
 	}
 }

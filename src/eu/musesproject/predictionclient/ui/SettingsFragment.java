@@ -14,6 +14,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -25,6 +26,8 @@ import eu.musesproject.predictionclient.Resetter;
 import eu.musesproject.predictionclient.dataexport.DataExport;
 import eu.musesproject.predictionclient.preferences.IsModelCreatedPreference;
 import eu.musesproject.predictionclient.preferences.IsWaitingForModelBuildPreference;
+import eu.musesproject.predictionclient.preferences.defaultpreferences.IsClassificationActivatedPreference;
+import eu.musesproject.predictionclient.preferences.defaultpreferences.IsLabelingActivatedPreference;
 import eu.musesproject.predictionclient.session.QuitService;
 
 public class SettingsFragment extends PreferenceFragment implements OnPreferenceClickListener,
@@ -84,6 +87,18 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 		mResetModelPreference = (Preference) mPreferenceScreen
 				.findPreference(getString(R.string.key_reset_model_preference));
 		mResetModelPreference.setOnPreferenceClickListener(this);
+		
+		if (IsLabelingActivatedPreference.getInstance(getActivity().getApplicationContext()).get(
+				)
+				|| IsModelCreatedPreference.getInstance().get(getActivity().getApplicationContext()
+						)
+				|| IsWaitingForModelBuildPreference.getInstance().get(
+						getActivity().getApplicationContext())
+				|| IsClassificationActivatedPreference.getInstance(getActivity().getApplicationContext()).get(
+						)) {
+			// starts the background service of MUSES
+			getActivity().startService(new Intent(getActivity(), MUSESBackgroundService.class));
+		}
 	}
 
 	@Override

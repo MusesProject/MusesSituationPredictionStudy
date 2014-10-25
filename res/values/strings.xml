@@ -37,8 +37,8 @@
     <string name="switch_labeling_summary_on">Turn off to disable labeling of your smartphone usage.</string>
     <string name="switch_labeling_summary_off">Turn on to enable labeling of your smartphone usage.</string>
     <string name="switch_classificiation_title">Classification</string>
-    <string name="switch_classificiation_summary_on">Turn on to enable classification of your smartphone usage.</string>
-    <string name="switch_classificiation_summary_off">Turn off to disable classification of your smartphone usage.</string>
+    <string name="switch_classificiation_summary_on">Turn off to disable classification of your smartphone usage.</string>
+    <string name="switch_classificiation_summary_off">Turn on to enable classification of your smartphone usage.</string>
     <string name="preference_session_count_title">Session Count</string>
     <string name="preference_session_count_summary">Number of labeled sessions before model is built</string>
     <string name="preference_export_data_title">Export data</string>

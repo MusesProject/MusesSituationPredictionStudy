@@ -57,11 +57,13 @@
 
         <service android:name="eu.musesproject.predictionclient.MUSESBackgroundService" >
         </service>
-  <!--       <service android:name="eu.musesproject.client.contextmonitoring.service.aidl.MusesServiceProvider" >
+        <!--
+             <service android:name="eu.musesproject.client.contextmonitoring.service.aidl.MusesServiceProvider" >
             <intent-filter>
                 <action android:name="eu.musesproject.client.contextmonitoring.service.aidl.IMusesService" />
             </intent-filter>
-        </service> -->
+        </service>
+        -->
         <service
             android:name="eu.musesproject.predictionclient.contextmonitoring.sensors.InteractionSensor"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
@@ -80,6 +82,8 @@
             </intent-filter>
         </receiver>
         <receiver android:name="eu.musesproject.predictionclient.session.controller.SessionController" >
+        </receiver>
+        <receiver android:name="eu.musesproject.predictionclient.CorrectionReceiver" >
         </receiver>
 
         <service android:name="eu.musesproject.predictionclient.session.QuitService" >
