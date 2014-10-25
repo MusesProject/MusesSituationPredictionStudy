@@ -1,6 +1,8 @@
 package eu.musesproject.predictionclient.ui;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -51,6 +53,8 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 	private NumberPicker np3;
 
 	private NumberPicker np4;
+
+	private Dialog mResetConfirmationDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -119,7 +123,7 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 				new DataExport(getActivity().getApplicationContext()).exportData();
 				return true;
 			} else if (key.equals(mResetModelPreference.getKey())) {
-				Resetter.resetAll(getActivity().getApplicationContext());
+				showResetConfirmationDialog();
 				return true;
 			}
 		}
@@ -154,6 +158,29 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 				int test2 = test;
 			}
 		}
+	}
+
+	private void showResetConfirmationDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setTitle(R.string.dialog_reset_model_title);
+		builder.setMessage(R.string.dialog_reset_model_text);
+		builder.setPositiveButton(R.string.dialog_session_count_ok_button_text, new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Resetter.resetAll(getActivity());
+			}
+		});
+		builder.setNegativeButton(R.string.dialog_session_count_cancel_button_text,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+
+		builder.show();
 	}
 
 	private void showSessionCountDialog() {
