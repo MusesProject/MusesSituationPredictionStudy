@@ -35,9 +35,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import eu.musesproject.client.R;
-import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 import eu.musesproject.predictionclient.contextmonitoring.ContextListener;
+import eu.musesproject.predictionclient.contextmonitoring.SensorConfiguration;
 
 /**
  * @author christophstanik

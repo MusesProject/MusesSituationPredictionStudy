@@ -28,6 +28,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Switch;
+import com.crashlytics.android.Crashlytics;
 
 /**
  * MainActivity class handles List buttons on the main GUI
@@ -50,6 +51,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
 //		setContentView(R.layout.muses_main);
 		getFragmentManager().beginTransaction()
 		.replace(android.R.id.content, new SettingsFragment()).commit();

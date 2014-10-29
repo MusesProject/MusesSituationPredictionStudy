@@ -88,6 +88,9 @@
 
         <service android:name="eu.musesproject.predictionclient.session.QuitService" >
         </service>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="ea9e5ecc9b05156583e279a29abdeabe7a80f962"/>
+        
+         <meta-data android:name="com.crashlytics.ApiKey" android:value="ea9e5ecc9b05156583e279a29abdeabe7a80f962"/>
     </application>
 
 </manifest>

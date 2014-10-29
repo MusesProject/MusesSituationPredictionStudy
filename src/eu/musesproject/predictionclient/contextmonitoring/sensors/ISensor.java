@@ -22,9 +22,9 @@ package eu.musesproject.predictionclient.contextmonitoring.sensors;
 
 import java.util.List;
 
-import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 import eu.musesproject.predictionclient.contextmonitoring.ContextListener;
+import eu.musesproject.predictionclient.contextmonitoring.SensorConfiguration;
 
 public interface ISensor {
 	public static String CONFIG_KEY_ENABLED = "enabled"; 

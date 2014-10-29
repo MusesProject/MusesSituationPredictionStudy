@@ -26,9 +26,9 @@ import java.util.List;
 import android.content.Context;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
-import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 import eu.musesproject.predictionclient.contextmonitoring.ContextListener;
+import eu.musesproject.predictionclient.contextmonitoring.SensorConfiguration;
 
 /**
  * @author christophstanik

@@ -43,9 +43,9 @@ import android.util.Log;
 
 import com.stericson.RootTools.RootTools;
 
-import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 import eu.musesproject.predictionclient.contextmonitoring.ContextListener;
+import eu.musesproject.predictionclient.contextmonitoring.SensorConfiguration;
 import eu.musesproject.predictionclient.db.DBManager;
 
 /**

@@ -28,3 +28,4 @@ proguard/
 # other
 /target
 .DS_Store
+com_crashlytics_export_strings.xml

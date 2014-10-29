@@ -29,7 +29,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.client.model.contextmonitoring.InteractionDictionary;
 import eu.musesproject.client.model.contextmonitoring.MailAttachment;
 import eu.musesproject.client.model.contextmonitoring.MailContent;
@@ -39,6 +38,7 @@ import eu.musesproject.client.model.decisiontable.Action;
 import eu.musesproject.client.model.decisiontable.ActionType;
 import eu.musesproject.contextmodel.ContextEvent;
 import eu.musesproject.predictionclient.contextmonitoring.ContextListener;
+import eu.musesproject.predictionclient.contextmonitoring.SensorConfiguration;
 import eu.musesproject.predictionclient.contextmonitoring.UserContextMonitoringController;
 
 public class InteractionSensor extends AccessibilityService implements ISensor {
