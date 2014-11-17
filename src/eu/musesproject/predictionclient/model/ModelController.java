@@ -65,7 +65,7 @@ public class ModelController {
 
 	public void buildModel(Context context) {
 		// first, check if the device is charging or is
-		if (checkChargingStatus(context)) {
+//		if (checkChargingStatus(context)) {
 
 			// open DB connection
 			DBManager dbManager = new DBManager(context);
@@ -100,7 +100,7 @@ public class ModelController {
 				}
 
 			}
-		}
+//		}
 	}
 
 	public Classifier getClassifier(Context context) {

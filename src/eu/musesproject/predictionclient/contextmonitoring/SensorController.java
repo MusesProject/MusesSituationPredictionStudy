@@ -205,5 +205,19 @@ public class SensorController {
 			ClassificationController.getInstance(context).classifyDataRecord();
 
 		}
+		
+		public void addContextEventToList(ContextEvent ceToAdd){
+			for (ContextEvent event : mAllEvents){
+				if(event.getType().equals(ceToAdd.getType()))
+				{
+					Map<String, String> props = ceToAdd.getProperties();
+					
+					
+					
+					
+					break;
+				}
+			}
+		}
 	}
 }
