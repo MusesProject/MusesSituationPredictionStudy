@@ -42,7 +42,8 @@ public class SessionIdGenerator {
 		if(oldSessionId == DefaultValues.INT){
 			oldSessionId = 0;
 		}
-		SessionIdPreference.getInstance().set(context, ++oldSessionId);
+		oldSessionId += 1;
+		SessionIdPreference.getInstance().set(context, oldSessionId);
 		return oldSessionId;
 	}
 	

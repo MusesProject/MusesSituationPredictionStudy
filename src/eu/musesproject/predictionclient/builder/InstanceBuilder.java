@@ -208,9 +208,10 @@ public class InstanceBuilder {
 					instance.setValue(getIndexOfAttribute(to.mAttributeName), 0);
 				} else if (to.mAttributeName.equals(ConnectivitySensor.PROPERTY_KEY_BLUETOOTH_CONNECTED)) {
 					instance.setValue(getIndexOfAttribute(to.mAttributeName), MODEL_DATA.BLUETOOTH_FALSE);
-				} else if (to.mAttributeName.equals(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME))
+				} else if (to.mAttributeName.equals(MODEL_DATA.USER_SELECTION_ATTRIBUTE_NAME)) {
+					int i = 0;
+					int i2 = i;
 
-				{
 				} else {
 
 					try {

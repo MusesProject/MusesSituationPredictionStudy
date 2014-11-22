@@ -71,6 +71,8 @@ public class ModelController {
 			DBManager dbManager = new DBManager(context);
 			dbManager.openDB();
 
+			// to delete datarecords without user selection, we delete the rows
+			
 			// get all app names to create an attribute for each of them in
 			// feature vector
 			ArrayList<String> allAppNames = dbManager.getAllUsedAppNamesAsArray();

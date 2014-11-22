@@ -21,10 +21,16 @@ package eu.musesproject.predictionclient.ui;
 
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import eu.musesproject.client.R;
 import eu.musesproject.predictionclient.ui.listener.SessionEndDialogListener;
@@ -36,7 +42,7 @@ import eu.musesproject.predictionclient.ui.listener.SessionStartDialogListener;
  * @author D
  * 
  */
-public class LabelDialog extends Activity {
+public class LabelDialog extends Activity implements OnDismissListener, OnCancelListener {
 
 	public static final String ACTION_SESSION_START = "session_start";
 	public static final String ACTION_SESSION_END = "session_end";
@@ -53,6 +59,7 @@ public class LabelDialog extends Activity {
 
 	}
 
+	@SuppressLint("NewApi")
 	private void showLabelDialog(String action) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setCancelable(false);
@@ -84,6 +91,8 @@ public class LabelDialog extends Activity {
 
 		}
 
+	
+		builder.setOnDismissListener(this);
 		builder.setNegativeButton(R.string.label_dialog_private_button_text,
 				listener);
 		builder.setNeutralButton(
@@ -91,7 +100,21 @@ public class LabelDialog extends Activity {
 
 		AlertDialog dialog = builder.create();
 		dialog.setCanceledOnTouchOutside(false);
-
+dialog.setOnCancelListener(this);
 		dialog.show();
+	}
+
+	@Override
+	public void onDismiss(DialogInterface dialog) {
+		// TODO Auto-generated method stub
+		int test = 1;
+		int test2 = test;
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog) {
+		// TODO Auto-generated method stub
+		int test = 1;
+		int test2 = test;
 	}
 }

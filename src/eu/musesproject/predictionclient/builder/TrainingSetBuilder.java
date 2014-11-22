@@ -1,4 +1,5 @@
 package eu.musesproject.predictionclient.builder;
+
 /*
  * #%L
  * musesclient
@@ -23,6 +24,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import eu.musesproject.predictionclient.db.DBManager;
 import eu.musesproject.predictionclient.model.ModelController.MODEL_DATA;
 import eu.musesproject.predictionclient.session.SessionIdGenerator;
@@ -32,32 +34,43 @@ public class TrainingSetBuilder {
 	public TrainingSetBuilder() {
 	}
 
-	public Instances createTrainingSet(Context context, DBManager dbManager,
-			FastVector allAttributesVector, int classIndex) {
+	public Instances createTrainingSet(Context context, DBManager dbManager, FastVector allAttributesVector,
+			int classIndex) {
 
 		// first, get the maximum session id
 		int maxSessionId = SessionIdGenerator.getMaxSessionId(context);
 
 		// Create an empty training set
-		Instances trainingSet = new Instances(MODEL_DATA.MODEL_IDENTIFIER_NB,
-				allAttributesVector, maxSessionId);
-		
-		// Set class index	
+		Instances trainingSet = new Instances(MODEL_DATA.MODEL_IDENTIFIER_NB, allAttributesVector, maxSessionId);
+
+		// Set class index
 		trainingSet.setClassIndex(classIndex);
 		InstanceBuilder instanceBuilder = new InstanceBuilder(allAttributesVector);
+		System.out.println("Max Sessions: " + maxSessionId);
 
-		for (int i = 0; i <= maxSessionId; ++i) {
+		for (int i = 1; i <= maxSessionId; ++i) {
 			Cursor sessionData = dbManager.getAllLabeledDataForSessionId(i);
-			Instance instance = instanceBuilder.getInstanceFromCursor(sessionData, trainingSet);
-			if (instance != null) {
-				trainingSet.add(instance);
+			sessionData.moveToFirst();
+			if (sessionData.getCount() > 0) {
+				try{
+					Log.d("createTrainingSet", "SessionID user selection: " + sessionData.getString(sessionData.getColumnIndex(DBManager.VALUE_USERSELECTION_LABELING)));
+				} catch (Exception e){
+					e.printStackTrace();
+					Log.d("createTrainingSet", "SessionID Exception: " + i);
+				}
+				Instance instance = instanceBuilder.getInstanceFromCursor(sessionData, trainingSet);
+				if (instance != null) {
+					trainingSet.add(instance);
+				}
+			}
+			else {
+				Log.d("createTrainingSet", "SessionID NOT used: " + i);
+
 			}
 			sessionData.close();
 		}
-		
-		trainingSet.compactify();
 
-		
+		trainingSet.compactify();
 
 		return trainingSet;
 	}

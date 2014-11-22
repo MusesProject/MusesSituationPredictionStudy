@@ -172,6 +172,7 @@ public class DBManager {
 	}
 
 	public long insertSessionId(int sessionId) {
+		Log.d("insertSessionId", "New sessionID: " + sessionId + "");
 		ContentValues cv = new ContentValues();
 		cv.put(SESSION_ID_USERSELECTION_LABELING, sessionId);
 		return sqLiteDatabase.insert(TABLE_USERSELECTION_LABELING, null, cv);
@@ -209,6 +210,9 @@ public class DBManager {
 	}
 
 	public void storeUserSelection(int sessionId, String selection) {
+		Log.d("storeUserSelection", "SessionId: " + sessionId + " Selection: " + selection);
+
+		
 		ContentValues cv = new ContentValues();
 		cv.put(VALUE_USERSELECTION_LABELING, selection);
 		sqLiteDatabase.update(TABLE_USERSELECTION_LABELING, cv, String.format(
@@ -230,13 +234,13 @@ public class DBManager {
 				+ String.format("FROM %s, %s, %s ",
 						TABLE_USERSELECTION_LABELING,
 						TABLE_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING)
-				+ String.format("WHERE %s.%s=%s.%s AND %s.%s=%s.%s",
+				+ String.format("WHERE %s.%s=%s.%s AND %s.%s=%s.%s AND (%s.%s IS NOT NULL OR %s.%s != '') ",
 						TABLE_USERSELECTION_LABELING,
 						SESSION_ID_USERSELECTION_LABELING,
 						TABLE_CONTEXTEVENT_LABELING,
 						SESSION_ID_CONTEXTEVENT_LABELING,
 						TABLE_CONTEXTEVENT_LABELING, ID_CONTEXTEVENT_LABELING,
-						TABLE_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING);
+						TABLE_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING, TABLE_USERSELECTION_LABELING, VALUE_USERSELECTION_LABELING, TABLE_USERSELECTION_LABELING, VALUE_USERSELECTION_LABELING);
 
 		return sqLiteDatabase.rawQuery(query, null);
 	}
@@ -256,7 +260,7 @@ public class DBManager {
 						TABLE_USERSELECTION_LABELING,
 						TABLE_CONTEXTEVENT_LABELING, TABLE_PROPERTY_LABELING)
 				+ String.format(
-						"WHERE %s.%s=%d AND %s.%s=%s.%s AND %s.%s=%s.%s ",
+						"WHERE %s.%s=%d AND %s.%s=%s.%s AND %s.%s=%s.%s AND (%s.%s IS NOT NULL OR %s.%s != '') ",
 						TABLE_USERSELECTION_LABELING,
 						SESSION_ID_USERSELECTION_LABELING, sessionId,
 						TABLE_USERSELECTION_LABELING,
@@ -264,12 +268,14 @@ public class DBManager {
 						TABLE_CONTEXTEVENT_LABELING,
 						SESSION_ID_CONTEXTEVENT_LABELING,
 						TABLE_CONTEXTEVENT_LABELING, ID_CONTEXTEVENT_LABELING,
-						TABLE_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING);
+						TABLE_PROPERTY_LABELING, CE_ID_PROPERTY_LABELING, TABLE_USERSELECTION_LABELING, VALUE_USERSELECTION_LABELING, TABLE_USERSELECTION_LABELING, VALUE_USERSELECTION_LABELING);
 
 		return sqLiteDatabase.rawQuery(query, null);
 	}
 
 	public Cursor getAllUsedAppNamesAsCursor() {
+//		String query = String.format("SELECT %s.%s, %s.%s ", TABLE_PROPERTY_LABELING, KEY_PROPERTY_LABELING, TABLE_PROPERTY_LABELING, VALUE_PROPERTY_LABELING) + String.format("FROM %s, %s ", TABLE_PROPERTY_LABELING, TABLE_USERSELECTION_LABELING), +String.format("WHERE %s.%s=%s.%s AND %s.%s IS NOT NULL", TABLE_PROPERTY_LABELING, );
+		
 		return sqLiteDatabase.query(TABLE_PROPERTY_LABELING, new String[] {
 				KEY_PROPERTY_LABELING, VALUE_PROPERTY_LABELING }, null, null,
 				null, null, null);
@@ -298,6 +304,10 @@ public class DBManager {
 
 		return array;
 	}
+	
+//	public int deleteDatarecordsWithoutUserSelection(){
+//		sqLiteDatabase.d
+//	}
 	
 	public void dropAllTables(){
 //		databaseHelper.onUpgrade(sqLiteDatabase, DATABASE_VERSION, DATABASE_VERSION);
