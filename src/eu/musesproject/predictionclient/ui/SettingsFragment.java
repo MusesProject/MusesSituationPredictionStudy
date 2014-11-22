@@ -28,7 +28,9 @@ import eu.musesproject.predictionclient.preferences.IsModelCreatedPreference;
 import eu.musesproject.predictionclient.preferences.IsWaitingForModelBuildPreference;
 import eu.musesproject.predictionclient.preferences.defaultpreferences.IsClassificationActivatedPreference;
 import eu.musesproject.predictionclient.preferences.defaultpreferences.IsLabelingActivatedPreference;
+import eu.musesproject.predictionclient.preferences.defaultpreferences.SessionCountPreference;
 import eu.musesproject.predictionclient.session.QuitService;
+import eu.musesproject.predictionclient.session.SessionIdGenerator;
 
 public class SettingsFragment extends PreferenceFragment implements OnPreferenceClickListener,
 		OnSharedPreferenceChangeListener, OnClickListener {
@@ -87,15 +89,11 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 		mResetModelPreference = (Preference) mPreferenceScreen
 				.findPreference(getString(R.string.key_reset_model_preference));
 		mResetModelPreference.setOnPreferenceClickListener(this);
-		
-		if (IsLabelingActivatedPreference.getInstance(getActivity().getApplicationContext()).get(
-				)
-				|| IsModelCreatedPreference.getInstance().get(getActivity().getApplicationContext()
-						)
-				|| IsWaitingForModelBuildPreference.getInstance().get(
-						getActivity().getApplicationContext())
-				|| IsClassificationActivatedPreference.getInstance(getActivity().getApplicationContext()).get(
-						)) {
+
+		if (IsLabelingActivatedPreference.getInstance(getActivity().getApplicationContext()).get()
+				|| IsModelCreatedPreference.getInstance().get(getActivity().getApplicationContext())
+				|| IsWaitingForModelBuildPreference.getInstance().get(getActivity().getApplicationContext())
+				|| IsClassificationActivatedPreference.getInstance(getActivity().getApplicationContext()).get()) {
 			// starts the background service of MUSES
 			getActivity().startService(new Intent(getActivity(), MUSESBackgroundService.class));
 		}
@@ -109,12 +107,20 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 			mPreferenceScreen.removePreference(mClassificationPreferenceCategory);
 
 			mLabelingPreferenceCategory.setEnabled(true);
+
+			
+
 		} else {
 			mPreferenceScreen.addPreference(mClassificationPreferenceCategory);
 
 			mLabelingPreferenceCategory.setEnabled(false);
 		}
 
+		if (SessionIdGenerator.getCurrentSessionId(getActivity()) != -1) {
+			mSessionCountPreference.setSummary("Status: " + SessionIdGenerator.getCurrentSessionId(getActivity())
+					+ "/" + SessionCountPreference.getInstance(getActivity()).get());
+		}
+		
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
 	}
@@ -168,9 +174,6 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 					getActivity().stopService(new Intent(getActivity(), MUSESBackgroundService.class));
 				}
 
-			} else {
-				int test = 1;
-				int test2 = test;
 			}
 		}
 	}
@@ -250,6 +253,11 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
 
 				PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).edit()
 						.putInt(mSessionCountPreference.getKey(), sessionCount).commit();
+
+				mSessionCountPreference.setSummary("Status: "
+						+ (SessionIdGenerator.getCurrentSessionId(getActivity()) == -1 ? 0 : SessionIdGenerator
+								.getCurrentSessionId(getActivity())) + "/"
+						+ SessionCountPreference.getInstance(getActivity()).get());
 
 				getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
