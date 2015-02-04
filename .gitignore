@@ -3,4 +3,4 @@
 /gen
 .classpath
 .idea
-.iml
+*.iml
