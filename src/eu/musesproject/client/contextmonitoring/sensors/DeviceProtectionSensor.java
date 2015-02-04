@@ -20,50 +20,59 @@ package eu.musesproject.client.contextmonitoring.sensors;
  * #L%
  */
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.http.conn.util.InetAddressUtils;
-
-import android.annotation.TargetApi;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
-
 import com.stericson.RootTools.RootTools;
-
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
+import eu.musesproject.client.db.handler.DBManager;
 import eu.musesproject.contextmodel.ContextEvent;
+import org.apache.http.conn.util.InetAddressUtils;
+
+import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author christophstanik
- * 
+ *
  *         Class to collect information about the device configuration
  */
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class DeviceProtectionSensor implements ISensor {
 	private static final String TAG = DeviceProtectionSensor.class.getSimpleName();
 
 	// sensor identifier
 	public static final String TYPE = "CONTEXT_SENSOR_DEVICE_PROTECTION";
 
+	// time in milliseconds when the sensor polls information
+	private static int OBSERVATION_INTERVALL = 10000;
+
 	// context property keys
-	public static final String PROPERTY_KEY_ID = "id";
-	public static final String PROPERTY_KEY_IS_ROOTED = "isrooted";
-	public static final String PROPERTY_KEY_IS_ROOT_PERMISSION_GIVEN = "isrootpermissiongiven";
-	public static final String PROPERTY_KEY_IP_ADRESS = "ipaddress";
-	public static final String PROPERTY_KEY_IS_PASSWORD_PROTECTED = "ispasswordprotected";
-	public static final String PROPERTY_KEY_SCREEN_TIMEOUT_IN_SECONDS = "screentimeoutinseconds";
-	public static final String PROPERTY_KEY_IS_TRUSTED_AV_INSTALLED = "istrustedantivirusinstalled";
+	public static final String PROPERTY_KEY_ID 							= "id";
+	public static final String PROPERTY_KEY_IS_ROOTED 					= "isrooted";
+	public static final String PROPERTY_KEY_IS_ROOT_PERMISSION_GIVEN 	= "isrootpermissiongiven";
+	public static final String PROPERTY_KEY_IP_ADRESS 					= "ipaddress";
+	public static final String PROPERTY_KEY_IS_PASSWORD_PROTECTED 		= "ispasswordprotected";
+	public static final String PROPERTY_KEY_SCREEN_TIMEOUT_IN_SECONDS 	= "screentimeoutinseconds";
+	public static final String PROPERTY_KEY_IS_TRUSTED_AV_INSTALLED 	= "istrustedantivirusinstalled";
+	public static final String PROPERTY_KEY_MUSES_DATABASE_EXISTS 		= "musesdatabaseexists";
+	public static final String PROPERTY_KEY_ACCESSIBILITY_ENABLED 		= "accessibilityenabled";
+
+	// config keys
+	public static final String CONFIG_KEY_TRUSTED_AV = "trustedav";
 
 	private Context context;
 	private ContextListener listener;
@@ -77,8 +86,6 @@ public class DeviceProtectionSensor implements ISensor {
 	// list with names of trusted anti virus applications
 	private List<String> trustedAVs;
 
-    private boolean initialContextEventFired;
-    
 	public DeviceProtectionSensor(Context context) {
 		this.context = context;
 		contextEventHistory = new ArrayList<ContextEvent>(CONTEXT_EVENT_HISTORY_SIZE);
@@ -90,36 +97,15 @@ public class DeviceProtectionSensor implements ISensor {
 		sensorEnabled = false;
 
 		trustedAVs = new ArrayList<String>();
-		mockTrustedDevices();
-		
-        initialContextEventFired = false;
-	}
-	
-	private void createInitialContextEvent() {
-        // create a list of installed ups and hold it
-		if(!initialContextEventFired) {
-			// create an initial context event since the information
-			// gathered by this sensor does not change often
-			new CreateContextEventAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			
-			initialContextEventFired = true;
-		}
-	}
-
-	private void mockTrustedDevices() {
-		trustedAVs.add("avast! Mobile Security");
-		trustedAVs.add("Mobile Security & Antivirus");
-		trustedAVs.add("Avira Antivirus Security");
-		trustedAVs.add("Norton Security & Antivirus");
-		trustedAVs.add("CM Security & Find My Phone");
+		RootTools.debugMode = false;
 	}
 
 	@Override
 	public void enable() {
 		if (!sensorEnabled) {
 			sensorEnabled = true;
-			
-            createInitialContextEvent();
+
+			new CreateContextEventAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
@@ -129,27 +115,80 @@ public class DeviceProtectionSensor implements ISensor {
 		contextEvent.setType(TYPE);
 		contextEvent.setTimestamp(System.currentTimeMillis());
 		contextEvent.addProperty(PROPERTY_KEY_ID, String.valueOf(contextEventHistory != null ? (contextEventHistory .size() + 1) : -1));
-//		contextEvent.addProperty(PROPERTY_KEY_IS_ROOTED, String.valueOf(checkDeviceRooted()));
-//		contextEvent.addProperty(PROPERTY_KEY_IS_ROOT_PERMISSION_GIVEN, String.valueOf(checkRootPermissionGiven()));
+		contextEvent.addProperty(PROPERTY_KEY_IS_ROOTED, String.valueOf(checkDeviceRooted()));
+		contextEvent.addProperty(PROPERTY_KEY_IS_ROOT_PERMISSION_GIVEN, String.valueOf(checkRootPermissionGiven()));
 		contextEvent.addProperty(PROPERTY_KEY_IP_ADRESS, getIPAddress(true));
 		contextEvent.addProperty(PROPERTY_KEY_IS_PASSWORD_PROTECTED, String.valueOf(isPasswordProtected()));
 		contextEvent.addProperty(PROPERTY_KEY_SCREEN_TIMEOUT_IN_SECONDS, String.valueOf(getScreenTimeout()));
 		contextEvent.addProperty(PROPERTY_KEY_IS_TRUSTED_AV_INSTALLED, String.valueOf(isTrustedAntiVirInstalled()));
-		
-		Log.d(TAG, "context event created");
+		contextEvent.addProperty(PROPERTY_KEY_MUSES_DATABASE_EXISTS, String.valueOf(musesDatabaseExist(context, DBManager.DATABASE_NAME)));
+		contextEvent.addProperty(PROPERTY_KEY_ACCESSIBILITY_ENABLED, String.valueOf(isAccessibilityForMusesEnabled()));
+		contextEvent.generateId();
 
-		if (listener != null) {
-			listener.onEvent(contextEvent);
+
+		if(contextEventHistory.size() > 0) {
+			ContextEvent previousContext = contextEventHistory.get(contextEventHistory.size() - 1);
+			// fire new context event if a connectivity context field changed
+			if(!identicalContextEvent(previousContext, contextEvent)) {
+				// add context event to the context event history
+				contextEventHistory.add(contextEvent);
+				if(contextEventHistory.size() > CONTEXT_EVENT_HISTORY_SIZE) {
+					contextEventHistory.remove(0);
+				}
+
+				if (contextEvent != null && listener != null) {
+					debug(contextEvent);
+					listener.onEvent(contextEvent);
+				}
+			}
 		}
+		else {
+			contextEventHistory.add(contextEvent);
+			if (contextEvent != null && listener != null) {
+				debug(contextEvent);
+				listener.onEvent(contextEvent);
+			}
+		}
+
 	}
 
-//	public boolean checkDeviceRooted() {
-//		return RootTools.isRootAvailable();
-//	}
-//
-//	public boolean checkRootPermissionGiven() {
-//		return RootTools.isAccessGiven();
-//	}
+	public void debug(ContextEvent contextEvent) {
+		for (Entry<String, String> set : contextEvent.getProperties().entrySet()) {
+			Log.d(TAG, set.getKey() + " = " + set.getValue());
+		}
+
+		Log.d(TAG, " ");
+	}
+
+	private boolean identicalContextEvent(ContextEvent oldEvent, ContextEvent newEvent) {
+		Map<String, String> oldProperties = oldEvent.getProperties();
+		oldProperties.remove(PROPERTY_KEY_ID);
+		Map<String, String> newProperties = newEvent.getProperties();
+		newProperties.remove(PROPERTY_KEY_ID);
+		for (Entry<String, String> set : newProperties.entrySet()) {
+			String oldValue = oldProperties.get(set.getKey());
+			String newValue = newProperties.get(set.getKey());
+//        	Log.d(TAG, oldValue + " " + newValue);
+			if(!oldValue.equals(newValue)) {
+//            	Log.d(TAG, "FALSE: " + oldValue + " " + newValue);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean checkDeviceRooted() {
+		return RootTools.isRootAvailable();
+	}
+
+	public boolean checkRootPermissionGiven() {
+		try{
+			return RootTools.isAccessGiven();
+		}catch (Exception e) {
+			return false;
+		}
+	}
 
 	public String getIPAddress(boolean useIPv4) {
 		try {
@@ -161,8 +200,9 @@ public class DeviceProtectionSensor implements ISensor {
 						String sAddr = addr.getHostAddress().toUpperCase();
 						boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
 						if (useIPv4) {
-							if (isIPv4)
+							if (isIPv4) {
 								return sAddr;
+							}
 						} else {
 							if (!isIPv4) {
 								int delim = sAddr.indexOf('%');
@@ -173,8 +213,9 @@ public class DeviceProtectionSensor implements ISensor {
 					}
 				}
 			}
-		} catch (Exception ex) {
-		} // for now eat exceptions
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return "";
 	}
 
@@ -192,7 +233,10 @@ public class DeviceProtectionSensor implements ISensor {
 		PackageManager packageManager = context.getPackageManager();
 		List<ApplicationInfo> installedApps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 		for (ApplicationInfo appInfo : installedApps) {
-			String appName = appInfo.loadLabel(packageManager).toString();
+			if(appInfo.packageName.equals("com.android.keyguard")) {
+				continue; // implemented to avoid that the log cat is flooded with warnings, because there is no app name for this package
+			}
+			String appName = (String) (appInfo != null ? packageManager.getApplicationLabel(appInfo) : "(unknown)");
 
 			for (String trustedAVName : trustedAVs) {
 				if (trustedAVName.equals(appName)) {
@@ -201,6 +245,46 @@ public class DeviceProtectionSensor implements ISensor {
 			}
 		}
 		return false;
+	}
+
+	public boolean musesDatabaseExist(Context context, String dbName) {
+		File dbFile = context.getDatabasePath(dbName);
+		return dbFile.exists();
+	}
+
+	private boolean isAccessibilityForMusesEnabled() {
+		int accessibilityEnabled = 0;
+		try {
+			accessibilityEnabled = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
+		} catch (SettingNotFoundException e) {
+			Log.d(TAG, "Error finding setting, default accessibility to not found: " + e.getMessage());
+		}
+
+		if (accessibilityEnabled==1){
+			String settingValue = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+
+			for (String name : settingValue.split(":")) {
+				if(name.contains(InteractionSensor.class.getName())) {
+					return true;
+				}
+				Log.d(TAG, name);
+			}
+		}
+		else {
+			return false;
+		}
+
+		return false;
+	}
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		for (SensorConfiguration item : config) {
+			Log.d(TAG, "DEVICE CONFIG TEST: key=" + item.getKey() + ", value="+item.getValue());
+			if(item.getKey().equals(CONFIG_KEY_TRUSTED_AV)) {
+				trustedAVs.add(item.getValue());
+			}
+		}
 	}
 
 	@Override
@@ -229,12 +313,23 @@ public class DeviceProtectionSensor implements ISensor {
 		}
 	}
 
+	@Override
+	public String getSensorType() {
+		return TYPE;
+	}
+
 	private class CreateContextEventAsync extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			if (sensorEnabled) {
+			while (sensorEnabled) {
 				createContextEvent();
+
+				try {
+					TimeUnit.MILLISECONDS.sleep(OBSERVATION_INTERVALL);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 			return null;
 		}

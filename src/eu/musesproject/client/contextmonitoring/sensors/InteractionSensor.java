@@ -1,78 +1,87 @@
 package eu.musesproject.client.contextmonitoring.sensors;
 
-import java.util.ArrayList;
-import java.util.List;
+/*
+ * #%L
+ * musesclient
+ * %%
+ * Copyright (C) 2013 - 2014 HITEC
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import android.accessibilityservice.AccessibilityService;
-import android.preference.PreferenceManager;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import eu.musesproject.client.R;
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
+import eu.musesproject.client.db.entity.SensorConfiguration;
+import eu.musesproject.client.model.contextmonitoring.MailAttachment;
+import eu.musesproject.client.model.contextmonitoring.MailContent;
+import eu.musesproject.client.model.contextmonitoring.MailProperties;
+import eu.musesproject.client.model.contextmonitoring.UISource;
+import eu.musesproject.client.model.decisiontable.Action;
+import eu.musesproject.client.model.decisiontable.ActionType;
 import eu.musesproject.contextmodel.ContextEvent;
 
-/**
- * 
- * @author danielgleim, christophstanik
- * 
- */
-public class InteractionSensor extends AccessibilityService implements ISensor {
-	private final static String TAG = InteractionSensor.class.getSimpleName();
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+public class InteractionSensor extends AccessibilityService implements ISensor {
+	private static final String TAG = InteractionSensor.class.getSimpleName();
+	
 	// sensor identifier
 	public static final String TYPE = "CONTEXT_SENSOR_INTERACTION";
 
-	// context property keys
-	public static final String PROPERTY_KEY_ID = "id";
-	public static final String PROPERTY_FOREGROUND_APP_PACKAGENAME = "apppackage";
-	public static final String PROPERTY_FOREGROUND_APP_NAME = "appname";
-	public static final String PROPERTY_CONTAINS_PASSWORDFIELDS = "passwordfields";
-
 	private ContextListener listener;
 
-	// history of fired context events
-	List<ContextEvent> contextEventHistory;
+	// stores all fired context events of this sensor
+	private List<ContextEvent> contextEventHistory;
+
+	// hold this value, because just specific apps shall be observed
+	private String appName;
 
 	// holds a value that indicates if the sensor is enabled or disabled
 	private boolean sensorEnabled;
 
-	public InteractionSensor() {
-		contextEventHistory = new ArrayList<ContextEvent>(CONTEXT_EVENT_HISTORY_SIZE);
 
+	// fields to hold the different keywords of each supported language 
+	private String to;
+	private String cc;
+	private String bcc;
+	private String subject;
+	private String send;
+	private String attach;
+
+	public InteractionSensor() {
 		init();
 	}
 
+
+	public InteractionSensor(String appName) {
+		this.appName = appName;
+		init();
+	}
+
+	// initializes all necessary default values
 	private void init() {
 		sensorEnabled = false;
-	}
-
-	@Override
-	public void enable() {
-		if (!sensorEnabled) {
-			sensorEnabled = true;
-		}
-	}
-
-	private void createContextEvent(String actionType, String containsPasswordField, String foregroundAppPackageName, String appName) {
-		// create context event
-		ContextEvent contextEvent = new ContextEvent();
-		contextEvent.setType(TYPE);
-		contextEvent.setTimestamp(System.currentTimeMillis());
-		contextEvent.addProperty(PROPERTY_KEY_ID, String.valueOf(contextEventHistory != null ? (contextEventHistory.size() + 1) : -1));
-		contextEvent.addProperty(PROPERTY_FOREGROUND_APP_PACKAGENAME, foregroundAppPackageName);
-		contextEvent.addProperty(PROPERTY_FOREGROUND_APP_NAME, appName);
-		contextEvent.addProperty(PROPERTY_CONTAINS_PASSWORDFIELDS, containsPasswordField);
-		
-		if (listener != null) {
-			listener.onEvent(contextEvent);
-		}
-	}
-
-
-	@Override
-	public void disable() {
-		if (sensorEnabled) {
-			sensorEnabled = false;
-		}
+		contextEventHistory = new ArrayList<ContextEvent>(CONTEXT_EVENT_HISTORY_SIZE);
 	}
 
 	@Override
@@ -86,6 +95,20 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 	}
 
 	@Override
+	public void enable() {
+		if (!sensorEnabled) {
+			sensorEnabled = true;
+		}
+	}
+
+	@Override
+	public void disable() {
+		if (sensorEnabled) {
+			sensorEnabled = false;
+		}
+	}
+
+	@Override
 	public ContextEvent getLastFiredContextEvent() {
 		if (contextEventHistory.size() > 0) {
 			return contextEventHistory.get(contextEventHistory.size() - 1);
@@ -95,25 +118,44 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 	}
 
 	@Override
-	protected void onServiceConnected() {
-		Log.d(TAG, "DetectPasswordFieldsAccessibilityService:onServiceConnected");
-		super.onServiceConnected();
+	public void onAccessibilityEvent(AccessibilityEvent event) {
+//		Log.d(TAG, "onAccessibilityEvent(AccessibilityEvent event) ||| package name: " + event.getPackageName());
+
 	}
 
-	public void onDestroy() {
-		Log.d(TAG, "DetectPasswordFieldsAccessibilityService:onDestroy");
-		super.onDestroy();
-	}
-
-
-	@Override
-	public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-		PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-	}
 
 	@Override
 	public void onInterrupt() {
-        Log.d(TAG, "DetectPasswordFieldsAccessibilityService:onInterrupt");
+		// ignore
+	}
 
+	public String getAppName() {
+		return this.appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+	
+	// returns the text of clicked view
+    private String getEventText(AccessibilityEvent event) {
+        StringBuilder sb = new StringBuilder();
+        for (CharSequence s : event.getText()) {
+            sb.append(s);
+        }
+        return sb.toString();
     }
+
+
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getSensorType() {
+		return TYPE;
+	}
 }

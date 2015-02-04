@@ -20,12 +20,6 @@ package eu.musesproject.client.contextmonitoring.sensors;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -39,8 +33,15 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.client.model.contextmonitoring.BluetoothState;
 import eu.musesproject.contextmodel.ContextEvent;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author christophstanik
@@ -123,6 +124,7 @@ public class ConnectivitySensor implements ISensor {
 
     /** adds the context event to the context event history */
     private void createContextEvent(ContextEvent contextEvent) {
+    	contextEvent.generateId();
         Log.d(TAG, "Connectivity  - context event created");
 
         // add context event to the context event history
@@ -168,7 +170,7 @@ public class ConnectivitySensor implements ISensor {
                 contextEvent.setType(TYPE);
                 contextEvent.setTimestamp(System.currentTimeMillis());
                 contextEvent.addProperty(PROPERTY_KEY_ID, String.valueOf(id));
-                if (mobileNetworkInfo !=null)
+                if (mobileNetworkInfo != null)
                     contextEvent.addProperty(PROPERTY_KEY_MOBILE_CONNECTED, String.valueOf(mobileNetworkInfo.isConnected()));
                 contextEvent.addProperty(PROPERTY_KEY_WIFI_ENABLED, String.valueOf(wifiManager.isWifiEnabled()));
                 if(wifiManager.isWifiEnabled()) {
@@ -258,4 +260,15 @@ public class ConnectivitySensor implements ISensor {
             return null;
         }
     }
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getSensorType() {
+		return TYPE;
+	}
 }

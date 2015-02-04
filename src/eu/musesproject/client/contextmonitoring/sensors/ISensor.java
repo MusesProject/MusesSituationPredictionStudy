@@ -21,9 +21,14 @@ package eu.musesproject.client.contextmonitoring.sensors;
  */
 
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 
+import java.util.List;
+
 public interface ISensor {
+	public static String CONFIG_KEY_ENABLED = "enabled"; 
+	
     /**
      * max size of the array for the context event history
      */
@@ -33,14 +38,14 @@ public interface ISensor {
     /**
      * Must be called before a sensor is enabled
      * register a listener to notify other components whenever a context event is fired
-     * @param listener of type {@link ContextListener}
+     * @param listener of type {@link eu.musesproject.client.contextmonitoring.ContextListener}
      */
     void addContextListener(ContextListener listener);
 
     /**
      * Must be called before a sensor is disabled.
      * unregister a listener
-     * @param listener of type {@link ContextListener}
+     * @param listener of type {@link eu.musesproject.client.contextmonitoring.ContextListener}
      */
     void removeContextListener(ContextListener listener);
 
@@ -54,4 +59,15 @@ public interface ISensor {
      * @return the last fired context event
      */
     ContextEvent getLastFiredContextEvent();
+    
+    /**
+     * Method to setup the configuration of a sensor
+     * @param config {@link SensorConfiguration}
+     */
+    void configure(List<SensorConfiguration> config);
+
+    /**
+     * Method to get the SensorType
+     */
+    String getSensorType();
 }

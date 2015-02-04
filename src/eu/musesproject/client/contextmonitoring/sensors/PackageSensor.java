@@ -20,9 +20,6 @@ package eu.musesproject.client.contextmonitoring.sensors;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +32,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
 import eu.musesproject.contextmodel.PackageStatus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author christophstanik
@@ -157,6 +158,7 @@ public class PackageSensor implements ISensor {
         contextEvent.addProperty(PROPERTY_KEY_APP_NAME, appName);
         contextEvent.addProperty(PROPERTY_KEY_APP_VERSION, appVersion);
         contextEvent.addProperty(PROPERTY_KEY_INSTALLED_APPS, getInstalledApps());
+        contextEvent.generateId();
         
         // just for debugging/testing purpose
 //        Iterator it = contextEvent.getProperties().entrySet().iterator();
@@ -283,5 +285,17 @@ public class PackageSensor implements ISensor {
 			}
 			return null;
 		}
+	}
+
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getSensorType() {
+		return TYPE;
 	}
 }

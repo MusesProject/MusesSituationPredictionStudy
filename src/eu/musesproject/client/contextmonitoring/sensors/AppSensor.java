@@ -20,9 +20,6 @@ package eu.musesproject.client.contextmonitoring.sensors;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -36,7 +33,11 @@ import android.os.Build;
 import android.util.Log;
 import eu.musesproject.client.R;
 import eu.musesproject.client.contextmonitoring.ContextListener;
+import eu.musesproject.client.db.entity.SensorConfiguration;
 import eu.musesproject.contextmodel.ContextEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author christophstanik
@@ -54,14 +55,16 @@ public class AppSensor implements ISensor {
     public static final String TYPE = "CONTEXT_SENSOR_APP";
 
     // time in milliseconds when the sensor polls information
-    private static int OBSERVATION_INTERVALL = 500;
+    private static int OBSERVATION_INTERVALL = 1000;
 
     // maximal number of how many background services are stored if a context event is fired
-    private static final int MAX_SHOWN_BACKGROUND_SERVICES = 100;
+    private static final int MAX_SHOWN_BACKGROUND_SERVICES = 1;
 
     // context property keys
     public static final String PROPERTY_KEY_ID 					= "id";
     public static final String PROPERTY_KEY_APP_NAME 			= "appname";
+    public static final String PROPERTY_KEY_PACKAGE_NAME		= "packagename";
+    public static final String PROPERTY_KEY_APP_VERSION			= "appversion";
     public static final String PROPERTY_KEY_BACKGROUND_PROCESS 	= "backgroundprocess";
 
     private Context context;
@@ -94,9 +97,7 @@ public class AppSensor implements ISensor {
      * @param runningServices list of background services
      * @param appName name of the currently active application
      */
-    private void createContextEvent(String appName, List<RunningServiceInfo> runningServices) {
-        Log.d(TAG, "APP - context event created: " +appName);
-
+    private void createContextEvent(String appName, String packageName, int appVersion, List<RunningServiceInfo> runningServices) {
         // get the running services
         List<String> runningServicesNames = new ArrayList<String>();
         for (RunningServiceInfo runningServiceInfo : runningServices) {
@@ -109,7 +110,10 @@ public class AppSensor implements ISensor {
         contextEvent.setTimestamp(System.currentTimeMillis());
         contextEvent.addProperty(PROPERTY_KEY_ID, String.valueOf(contextEventHistory != null ? (contextEventHistory.size() + 1) : -1));
         contextEvent.addProperty(PROPERTY_KEY_APP_NAME, appName);
+        contextEvent.addProperty(PROPERTY_KEY_PACKAGE_NAME, packageName);
+        contextEvent.addProperty(PROPERTY_KEY_APP_VERSION, String.valueOf(appVersion));
         contextEvent.addProperty(PROPERTY_KEY_BACKGROUND_PROCESS, runningServicesNames.toString());
+        contextEvent.generateId();
 
         // add context event to the context event history
         contextEventHistory.add(contextEvent);
@@ -118,7 +122,7 @@ public class AppSensor implements ISensor {
         }
 
         if(listener != null) {
-            //Log.d(TAG, "called: listener.onEvent(contextEvent);");
+            Log.d(TAG, "called: listener.onEvent(contextEvent); app name: " + appName);
             listener.onEvent(contextEvent);
         }
     }
@@ -158,23 +162,25 @@ public class AppSensor implements ISensor {
                 PackageManager pm = context.getPackageManager();
                 PackageInfo foregroundAppPackageInfo;
                 String foregroundTaskAppName = "";
-                List<ActivityManager.RunningServiceInfo> runningServices = null;
+                int appVersion;
+                List<RunningServiceInfo> runningServices = null;
                 try {
                     foregroundAppPackageInfo = pm.getPackageInfo(foregroundTaskPackageName, 0);
                 	foregroundTaskAppName = foregroundAppPackageInfo.applicationInfo.loadLabel(pm).toString();
+                	appVersion = foregroundAppPackageInfo.versionCode;
                 	runningServices = activityManager.getRunningServices(MAX_SHOWN_BACKGROUND_SERVICES);
 
                     // fill previousApp with the first one in session
                     // and set the start time of the first application
                     if(previousApp.equals("")) {
-                        createContextEvent(foregroundTaskAppName, runningServices);
+                        createContextEvent(foregroundTaskAppName, foregroundTaskPackageName, appVersion, runningServices);
                         previousApp = foregroundTaskAppName;
                     }
 
                     // if the foreground application changed, create a context event
                     if(!foregroundTaskAppName.equals(previousApp)) {
                         if(!foregroundTaskAppName.equals(context.getResources().getString(R.string.app_name))) {
-                        	createContextEvent(foregroundTaskAppName, runningServices);
+                        	createContextEvent(foregroundTaskAppName, foregroundTaskPackageName, appVersion, runningServices);
                         	previousApp = foregroundTaskAppName;
                         }
                     }
@@ -209,4 +215,15 @@ public class AppSensor implements ISensor {
             return null;
         }
     }
+
+	@Override
+	public void configure(List<SensorConfiguration> config) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getSensorType() {
+		return TYPE;
+	}
 }
