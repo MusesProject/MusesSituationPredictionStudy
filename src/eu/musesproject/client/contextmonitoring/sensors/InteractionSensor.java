@@ -33,91 +33,112 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InteractionSensor extends AccessibilityService implements ISensor {
-	private static final String TAG = InteractionSensor.class.getSimpleName();
-	
-	// sensor identifier
-	public static final String TYPE = "CONTEXT_SENSOR_INTERACTION";
+    private static final String TAG = InteractionSensor.class.getSimpleName();
 
-	private ContextListener listener;
+    // sensor identifier
+    public static final String TYPE = "CONTEXT_SENSOR_INTERACTION";
+    public static final String PROPERTY_KEY_APP_NAME 		= "appname";
+    public static final String PROPERTY_KEY_VIEW_TYPE		= "packagename";
+    public static final String PROPERTY_KEY_EVENT_TYPE		= "appversion";
+    public static final String PROPERTY_KEY_EVENT_TEXT 	    = "backgroundprocess";
 
-	// stores all fired context events of this sensor
-	private List<ContextEvent> contextEventHistory;
+    private ContextListener listener;
 
-	// holds a value that indicates if the sensor is enabled or disabled
-	private boolean sensorEnabled;
+    // stores all fired context events of this sensor
+    private List<ContextEvent> contextEventHistory;
 
-
-	public InteractionSensor() {
-		init();
-	}
+    // holds a value that indicates if the sensor is enabled or disabled
+    private boolean sensorEnabled;
 
 
-	// initializes all necessary default values
-	private void init() {
-		sensorEnabled = false;
-		contextEventHistory = new ArrayList<ContextEvent>(CONTEXT_EVENT_HISTORY_SIZE);
-	}
+    private PackageManager pckManager;
+    private PackageInfo pckInfo;
 
-	@Override
-	public void addContextListener(ContextListener listener) {
-		this.listener = listener;
-	}
 
-	@Override
-	public void removeContextListener(ContextListener listener) {
-		this.listener = listener;
-	}
+    public InteractionSensor() {
+        init();
+    }
 
-	@Override
-	public void enable() {
-		if (!sensorEnabled) {
-			sensorEnabled = true;
-		}
-	}
 
-	@Override
-	public void disable() {
-		if (sensorEnabled) {
-			sensorEnabled = false;
-		}
-	}
+    // initializes all necessary default values
+    private void init() {
+        sensorEnabled = false;
+        contextEventHistory = new ArrayList<ContextEvent>(CONTEXT_EVENT_HISTORY_SIZE);
+    }
 
-	@Override
-	public ContextEvent getLastFiredContextEvent() {
-		if (contextEventHistory.size() > 0) {
-			return contextEventHistory.get(contextEventHistory.size() - 1);
-		} else {
-			return null;
-		}
-	}
+    @Override
+    public void addContextListener(ContextListener listener) {
+        this.listener = listener;
+    }
 
-	@Override
-	public void onAccessibilityEvent(AccessibilityEvent event) {
-        String pckName = event.getPackageName().toString();
-        String appName = "";
+    @Override
+    public void removeContextListener(ContextListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void enable() {
+        if (!sensorEnabled) {
+            sensorEnabled = true;
+        }
+    }
+
+    @Override
+    public void disable() {
+        if (sensorEnabled) {
+            sensorEnabled = false;
+        }
+    }
+
+    @Override
+    public ContextEvent getLastFiredContextEvent() {
+        if (contextEventHistory.size() > 0) {
+            return contextEventHistory.get(contextEventHistory.size() - 1);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        long eventTime = System.currentTimeMillis();
+        String appName = getAppName(event.getPackageName().toString());
         String viewType = event.getClassName().toString();
+        String eventType = getEventType(event.getEventType());
+        String eventText = getEventText(event);
 
-        PackageManager pckManager = getPackageManager();
-        PackageInfo pckInfo = null;
+        Log.d(TAG, "app:" + appName + " viewType:" + viewType + " viewText:" + eventText + " eventType:"+eventType + " eventTime:" + eventTime);
+        createContextEvent(eventTime, appName, viewType, eventType, eventText);
+    }
+
+
+    @Override
+    public void onInterrupt() {
+        // ignore
+    }
+
+    private String getAppName(String pckName) {
+        String appName = "";
+        if(pckManager == null) {
+            pckManager = getPackageManager();
+        }
         try {
             pckInfo = pckManager.getPackageInfo(pckName, 0);
             appName = pckInfo.applicationInfo.loadLabel(pckManager).toString();
         } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
-        String eventText = getEventText(event);
-        if(!eventText.isEmpty()) {
-            Log.d(TAG, "app:" + appName + " viewType:" + viewType + " viewText:" + eventText);
-        }
-	}
 
+        return appName;
+    }
 
-	@Override
-	public void onInterrupt() {
-		// ignore
-	}
-	
-	// returns the text of clicked view
+    // returns the text of clicked view
     private String getEventText(AccessibilityEvent event) {
+        if(event.getClassName().equals("android.widget.EditText")) {
+            return ""; // do not store the written text
+        }
+
+        // if there is no privacy sensitive data. continue here
         StringBuilder sb = new StringBuilder();
         for (CharSequence s : event.getText()) {
             sb.append(s);
@@ -125,16 +146,41 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
         return sb.toString();
     }
 
+    private String getEventType(int eventTypeNumber) {
+        String eventType = "";
+        switch(eventTypeNumber) {
+            case AccessibilityEvent.TYPE_VIEW_CLICKED:
+                eventType = "clicked";
+                break;
+            case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+                eventType = "scrolled";
+                break;
+            case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+                eventType = "textChanged";
+                break;
+        }
+
+        return eventType;
+    }
 
 
-	@Override
-	public void configure(List<SensorConfiguration> config) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void configure(List<SensorConfiguration> config) {
+        // ignore
+    }
 
-	@Override
-	public String getSensorType() {
-		return TYPE;
-	}
+    @Override
+    public String getSensorType() {
+        return TYPE;
+    }
+
+    private void createContextEvent(long eventTime, String appName, String viewType, String eventType, String eventText) {
+        ContextEvent contextEvent = new ContextEvent();
+        contextEvent.setTimestamp(eventTime);
+        contextEvent.setType(TYPE);
+        contextEvent.addProperty(PROPERTY_KEY_APP_NAME, appName);
+        contextEvent.addProperty(PROPERTY_KEY_VIEW_TYPE, viewType);
+        contextEvent.addProperty(PROPERTY_KEY_EVENT_TYPE, eventType);
+        contextEvent.addProperty(PROPERTY_KEY_EVENT_TEXT, eventText);
+    }
 }
