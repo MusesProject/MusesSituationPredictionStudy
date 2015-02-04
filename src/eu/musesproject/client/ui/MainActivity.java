@@ -19,6 +19,7 @@ package eu.musesproject.client.ui;
  * limitations under the License.
  * #L%
  */
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,80 +37,42 @@ import eu.musesproject.client.prediction.session.QuitService;
 
 /**
  * MainActivity class handles List buttons on the main GUI
- * 
+ *
  * @author Yasir Ali
  * @version Jan 27, 2014
  */
 
-public class MainActivity extends Activity implements View.OnClickListener,
-		OnCheckedChangeListener {
+public class MainActivity extends Activity{
 
-	private static String TAG = MainActivity.class.getSimpleName();
-	private Button mExportButton;
-	private Switch mLabelingSwitch;
+    private static String TAG = MainActivity.class.getSimpleName();
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.muses_main);
 
-		// loginListBtn.setOnClickListener(this);
-		// securityInformationListbtn.setOnClickListener(this);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.muses_main);
 
-		mExportButton = (Button) findViewById(R.id.export_button);
-		mExportButton.setOnClickListener(this);
 
-		mLabelingSwitch = (Switch) findViewById(R.id.labeling_switch);
+        // starts the background service of MUSES
+        startService(new Intent(this, MUSESBackgroundService.class));
+        Log.v(TAG, "muses service started ...");
 
-		if (IsLabelingActivatedPreference.getInstance().get(
-				getApplicationContext())) {
-			// starts the background service of MUSES
-			startService(new Intent(this, MUSESBackgroundService.class));
-			Log.v(TAG, "muses service started ...");
-		}
-	}
+    }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
-	@Override
-	protected void onStop() {
-		super.onStop();
-	}
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.export_button:
-			new DataExport(getApplicationContext()).exportData();
-			break;
-		}
-	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		mLabelingSwitch.setOnCheckedChangeListener(null);
-		if (IsLabelingActivatedPreference.getInstance().get(
-				getApplicationContext())) {
-			mLabelingSwitch.setChecked(true);
-		}
-		mLabelingSwitch.setOnCheckedChangeListener(this);
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
 
-	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		if(isChecked){
-			startService(new Intent(this, MUSESBackgroundService.class));
-		} else {
-			startService(new Intent(this, QuitService.class));
-			stopService(new Intent(this, MUSESBackgroundService.class));
-		}
-		
-		IsLabelingActivatedPreference.getInstance().set(
-				getApplicationContext(), isChecked);
-	}
-
+    }
 }
