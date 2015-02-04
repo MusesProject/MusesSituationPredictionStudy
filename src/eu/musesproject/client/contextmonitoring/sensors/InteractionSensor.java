@@ -59,24 +59,10 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 	// holds a value that indicates if the sensor is enabled or disabled
 	private boolean sensorEnabled;
 
-
-	// fields to hold the different keywords of each supported language 
-	private String to;
-	private String cc;
-	private String bcc;
-	private String subject;
-	private String send;
-	private String attach;
-
 	public InteractionSensor() {
 		init();
 	}
 
-
-	public InteractionSensor(String appName) {
-		this.appName = appName;
-		init();
-	}
 
 	// initializes all necessary default values
 	private void init() {
@@ -129,15 +115,6 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 		// ignore
 	}
 
-	public String getAppName() {
-		return this.appName;
-	}
-
-	public void setAppName(String appName) {
-		this.appName = appName;
-	}
-	
-	// returns the text of clicked view
     private String getEventText(AccessibilityEvent event) {
         StringBuilder sb = new StringBuilder();
         for (CharSequence s : event.getText()) {
