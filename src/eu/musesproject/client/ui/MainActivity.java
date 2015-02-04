@@ -21,19 +21,14 @@ package eu.musesproject.client.ui;
  */
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.Switch;
+import android.view.LayoutInflater;
 import eu.musesproject.MUSESBackgroundService;
 import eu.musesproject.client.R;
-import eu.musesproject.client.prediction.dataexport.DataExport;
-import eu.musesproject.client.prediction.preferences.IsLabelingActivatedPreference;
-import eu.musesproject.client.prediction.session.QuitService;
 
 /**
  * MainActivity class handles List buttons on the main GUI
@@ -57,6 +52,14 @@ public class MainActivity extends Activity{
         startService(new Intent(this, MUSESBackgroundService.class));
         Log.v(TAG, "muses service started ...");
 
+        showInstallationDialog();
+    }
+
+    private void showInstallationDialog() {
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.add(new InstallationDialogActivity(), InstallationDialogActivity.class.getSimpleName());
+        transaction.commit();
     }
 
     @Override

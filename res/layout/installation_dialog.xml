@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:text="Thank you for participating in our situation prediction study. Before we could start, we need some information from you. First, we randomly generated a device Id to identify your data points. Next, you need to enable the accessibility framework. Last, we need to know your current location to identify if you used your smartphone at home or at work."
+            android:background="@drawable/text_view_shape"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            />
+
+
+    <!--<View android:layout_width="match_parent" android:layout_height="5dp"-->
+    <!--android:background="@android:color/black"/>-->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Your device id:"
+                android:gravity="center"
+                android:textSize="@dimen/textSize"
+               />
+
+
+        <TextView android:layout_width="0dp"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+                  android:id="@+id/deviceId"
+                  android:gravity="center"
+                  android:textSize="@dimen/textSize"/>
+    </LinearLayout>
+
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Push, to enable accessibility."
+            android:background="@drawable/button_shape"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your current location:"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:textSize="@dimen/textSize"
+            />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            >
+
+        <Button android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="Home"
+                android:background="@drawable/button_shape"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="4dp"
+               />
+
+
+
+
+        <Button android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="Work"
+                android:background="@drawable/button_shape"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"/>
+
+        <Button android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="On the way"
+                android:background="@drawable/button_shape"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="8dp"/>
+    </LinearLayout>
+</LinearLayout>
