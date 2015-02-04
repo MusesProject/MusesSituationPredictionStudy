@@ -5,6 +5,13 @@
     android:background="#ffffff"
     android:orientation="vertical" >
 
+    <TextView
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="Sorry, nothing to show you here."
+        android:textSize="20sp"/>
+<!--
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,7 +38,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
-
+-->
    <!--   <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,13 +58,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center" > -->
-
+<!--
             <Button
                 android:layout_marginTop="8dp"
                 android:id="@+id/export_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Export Data" />
+                android:text="Export Data" /> -->
         <!--  </LinearLayout>
     </LinearLayout> -->
 
