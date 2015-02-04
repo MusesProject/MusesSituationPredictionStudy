@@ -127,8 +127,6 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 
 	@Override
 	public void configure(List<SensorConfiguration> config) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
