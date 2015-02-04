@@ -182,5 +182,15 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
         contextEvent.addProperty(PROPERTY_KEY_VIEW_TYPE, viewType);
         contextEvent.addProperty(PROPERTY_KEY_EVENT_TYPE, eventType);
         contextEvent.addProperty(PROPERTY_KEY_EVENT_TEXT, eventText);
+
+        // add context event to the context event history
+        contextEventHistory.add(contextEvent);
+        if(contextEventHistory.size() > CONTEXT_EVENT_HISTORY_SIZE) {
+            contextEventHistory.remove(0);
+        }
+
+        if(listener != null) {
+            listener.onEvent(contextEvent);
+        }
     }
 }
