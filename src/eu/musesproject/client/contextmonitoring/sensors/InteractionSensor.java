@@ -21,26 +21,16 @@ package eu.musesproject.client.contextmonitoring.sensors;
  */
 
 import android.accessibilityservice.AccessibilityService;
-import android.content.res.Resources;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-import eu.musesproject.client.R;
 import eu.musesproject.client.contextmonitoring.ContextListener;
-import eu.musesproject.client.contextmonitoring.UserContextMonitoringController;
 import eu.musesproject.client.db.entity.SensorConfiguration;
-import eu.musesproject.client.model.contextmonitoring.MailAttachment;
-import eu.musesproject.client.model.contextmonitoring.MailContent;
-import eu.musesproject.client.model.contextmonitoring.MailProperties;
-import eu.musesproject.client.model.contextmonitoring.UISource;
-import eu.musesproject.client.model.decisiontable.Action;
-import eu.musesproject.client.model.decisiontable.ActionType;
 import eu.musesproject.contextmodel.ContextEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class InteractionSensor extends AccessibilityService implements ISensor {
 	private static final String TAG = InteractionSensor.class.getSimpleName();
@@ -53,30 +43,14 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 	// stores all fired context events of this sensor
 	private List<ContextEvent> contextEventHistory;
 
-	// hold this value, because just specific apps shall be observed
-	private String appName;
-
 	// holds a value that indicates if the sensor is enabled or disabled
 	private boolean sensorEnabled;
 
-
-	// fields to hold the different keywords of each supported language 
-	private String to;
-	private String cc;
-	private String bcc;
-	private String subject;
-	private String send;
-	private String attach;
 
 	public InteractionSensor() {
 		init();
 	}
 
-
-	public InteractionSensor(String appName) {
-		this.appName = appName;
-		init();
-	}
 
 	// initializes all necessary default values
 	private void init() {
@@ -119,22 +93,27 @@ public class InteractionSensor extends AccessibilityService implements ISensor {
 
 	@Override
 	public void onAccessibilityEvent(AccessibilityEvent event) {
-//		Log.d(TAG, "onAccessibilityEvent(AccessibilityEvent event) ||| package name: " + event.getPackageName());
+        String pckName = event.getPackageName().toString();
+        String appName = "";
+        String viewType = event.getClassName().toString();
 
+        PackageManager pckManager = getPackageManager();
+        PackageInfo pckInfo = null;
+        try {
+            pckInfo = pckManager.getPackageInfo(pckName, 0);
+            appName = pckInfo.applicationInfo.loadLabel(pckManager).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        String eventText = getEventText(event);
+        if(!eventText.isEmpty()) {
+            Log.d(TAG, "app:" + appName + " viewType:" + viewType + " viewText:" + eventText);
+        }
 	}
 
 
 	@Override
 	public void onInterrupt() {
 		// ignore
-	}
-
-	public String getAppName() {
-		return this.appName;
-	}
-
-	public void setAppName(String appName) {
-		this.appName = appName;
 	}
 	
 	// returns the text of clicked view
