@@ -13,7 +13,7 @@ public class DBManager {
 
 	private static final String TAG = DBManager.class.getSimpleName();
 	private static final int DATABASE_VERSION = 1;
-	private static final String DATABASE_NAME = "muses_client_db";
+	public static final String DATABASE_NAME = "muses_client_db";
 
 	// table names and column names for prediction/labeling
 	private static final String TABLE_CONTEXTEVENT_LABELING = "table_contextevent_labeling";
